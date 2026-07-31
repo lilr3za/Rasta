@@ -1,0 +1,2932 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>اراده آهنین | Habit Tracker</title>
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#0c0d0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="اراده آهنین">
+    <link rel="icon" href="./icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap');
+
+        :root {
+            --bg-main: #0c0d0f;
+            --bg-card: #1f2124;
+            --text-main: #f0f2f5;
+            --text-muted: #8a8d91;
+            --accent-blue: #2a65f0;
+            --accent-blue-grad: linear-gradient(135deg, #2b58d1, #4b8af3);
+            --accent-green: #34c759;
+            --accent-red: #ff3b30;
+            --accent-gold: #ffd700;
+            --nav-bg: rgba(31, 33, 36, 0.95);
+            --border-color: rgba(255, 255, 255, 0.05);
+            --input-bg: rgba(0, 0, 0, 0.4);
+        }
+
+        body.theme-light {
+            --bg-main: #f0f2f5;
+            --bg-card: #ffffff;
+            --text-main: #1f2124;
+            --text-muted: #666666;
+            --nav-bg: rgba(255, 255, 255, 0.95);
+            --border-color: rgba(0, 0, 0, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            background-attachment: fixed;
+            display: flex;
+            justify-content: center;
+            transition: 0.3s ease;
+        }
+        body:not(.theme-light) {
+            background-image: radial-gradient(ellipse at top right, rgba(80, 65, 40, 0.4) 0%, var(--bg-main) 50%);
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            min-height: 100vh;
+            padding: 20px 20px 110px 20px;
+            position: relative;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-top: 10px;
+        }
+        header h1 {
+            font-size: 22px;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+        }
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .settings-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--text-main);
+            font-size: 18px;
+            cursor: pointer;
+            background: var(--bg-card);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+            border: 1px solid var(--border-color);
+        }
+        .settings-icon:hover {
+            transform: scale(1.05);
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color);
+            transition: 0.3s ease;
+        }
+
+        .timer-card {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+        .timer-title {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+        .timer-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            direction: ltr;
+        }
+        .time-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .time-val {
+            font-size: 32px;
+            font-weight: 900;
+            line-height: 1.1;
+        }
+        .time-label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .reset-btn {
+            background: var(--input-bg);
+            border: none;
+            color: var(--text-main);
+            padding: 12px 10px;
+            border-radius: 16px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
+        .reset-btn:hover {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--accent-red);
+        }
+        .undo-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+            font-family: 'Vazirmatn';
+            transition: 0.2s;
+            margin-top: 15px;
+        }
+        .undo-btn:hover {
+            color: var(--accent-red);
+        }
+
+        .start-btn {
+            background: var(--accent-green);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 18px;
+            border-radius: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(52, 199, 89, 0.4);
+            transition: 0.3s;
+        }
+        .start-btn:active {
+            transform: scale(0.95);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            padding: 16px 10px;
+            border-radius: 16px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
+        }
+        .stat-box .val {
+            font-size: 20px;
+            font-weight: 900;
+            color: var(--text-main);
+            margin-bottom: 6px;
+        }
+        .stat-box .label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: bold;
+        }
+        .stat-box i {
+            font-size: 18px;
+            margin-bottom: 8px;
+            opacity: 0.8;
+        }
+
+        .bio-card {
+            border: 2px solid rgba(52, 199, 89, 0.5);
+            box-shadow: 0 0 15px rgba(52, 199, 89, 0.15);
+            background: linear-gradient(180deg, rgba(52, 199, 89, 0.05) 0%, var(--bg-card) 100%);
+        }
+        .coach-card {
+            border: 2px solid rgba(42, 101, 240, 0.5);
+            box-shadow: 0 0 15px rgba(42, 101, 240, 0.15);
+            background: linear-gradient(180deg, rgba(42, 101, 240, 0.05) 0%, var(--bg-card) 100%);
+        }
+        .card-title-icon {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .urge-card {
+            background: var(--accent-blue-grad);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            color: white;
+        }
+        .urge-card::after {
+            content: '\f06d';
+            font-family: 'FontAwesome';
+            position: absolute;
+            left: -10px;
+            top: -10px;
+            font-size: 120px;
+            opacity: 0.1;
+            transform: rotate(-15deg);
+        }
+        .urge-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            z-index: 2;
+            position: relative;
+        }
+        .urge-card p {
+            font-size: 13px;
+            opacity: 0.9;
+            z-index: 2;
+            position: relative;
+            line-height: 1.5;
+        }
+
+        .help-card {
+            padding: 0;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .help-header {
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            background: var(--input-bg);
+            transition: 0.3s;
+        }
+        .help-header:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .help-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: var(--bg-card);
+        }
+        .help-content-inner {
+            padding: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            line-height: 1.8;
+            text-align: justify;
+        }
+        .help-content-inner ul {
+            padding-right: 20px;
+            margin-bottom: 15px;
+        }
+        .help-content-inner li {
+            margin-bottom: 8px;
+        }
+        .help-icon-rotate {
+            transform: rotate(180deg);
+            transition: 0.3s;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .days-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .day-cell {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            cursor: pointer;
+            background: var(--input-bg);
+            transition: 0.2s;
+        }
+        .day-cell.clean {
+            background: rgba(52, 199, 89, 0.2);
+            color: var(--accent-green);
+            font-weight: bold;
+            border: 1px solid rgba(52, 199, 89, 0.4);
+        }
+        .day-cell.slip {
+            background: var(--accent-red);
+            color: white;
+            font-weight: bold;
+        }
+        .day-cell.today {
+            border: 2px solid var(--text-main);
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        .tag-btn {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Vazirmatn';
+            user-select: none;
+        }
+        .tag-btn.active {
+            background: rgba(42, 101, 240, 0.15);
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+
+        .goal-input-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .goal-input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-main);
+            text-align: center;
+            font-family: 'Vazirmatn';
+            outline: none;
+        }
+        .goal-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: none;
+            background: var(--accent-blue);
+            color: white;
+            font-family: 'Vazirmatn';
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .badge-card {
+            background: var(--input-bg);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border-color);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .badge-card.unlocked {
+            border-color: rgba(var(--badge-rgb), 0.3);
+            background: linear-gradient(135deg, rgba(var(--badge-rgb), 0.08) 0%, var(--bg-card) 100%);
+            box-shadow: 0 4px 15px rgba(var(--badge-rgb), 0.08);
+        }
+        .badge-glow {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 100px;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 0;
+        }
+        .badge-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            background: var(--input-bg);
+            transition: 0.4s;
+            position: relative;
+            z-index: 2;
+        }
+        .badge-card.unlocked .badge-icon-box {
+            background: rgba(var(--badge-rgb), 0.15);
+            box-shadow: inset 0 0 10px rgba(var(--badge-rgb), 0.2), 0 0 15px rgba(var(--badge-rgb), 0.3);
+            transform: scale(1.05);
+        }
+        .badge-info {
+            flex: 1;
+            position: relative;
+            z-index: 2;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(128, 128, 128, 0.2);
+            border-radius: 4px;
+            margin-top: 10px;
+            overflow: hidden;
+            position: relative;
+            z-index: 2;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 4px;
+        }
+        .badge-multiplier {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: var(--input-bg);
+            color: var(--text-muted);
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            border: 1px solid var(--border-color);
+            z-index: 5;
+        }
+        .badge-card.unlocked .badge-multiplier {
+            background: rgba(var(--badge-rgb), 0.15);
+            color: rgb(var(--badge-rgb));
+            border-color: rgba(var(--badge-rgb), 0.3);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 220px;
+            width: 100%;
+            margin-top: 15px;
+        }
+        .chart-slider-wrapper {
+            overflow: hidden;
+            width: 100%;
+            position: relative;
+            touch-action: pan-y;
+        }
+        .chart-slider-inner {
+            display: flex;
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 200%;
+        }
+        .chart-slide {
+            width: 50%;
+            flex-shrink: 0;
+            position: relative;
+            height: 220px;
+        }
+        .chart-slide canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        .chart-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .chart-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--border-color);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .chart-dot.active {
+            background: var(--accent-blue);
+            box-shadow: 0 0 8px rgba(42, 101, 240, 0.5);
+        }
+        .chart-export-btn {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            z-index: 10;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 15px;
+            transition: 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        .chart-export-btn:hover {
+            color: var(--accent-blue);
+            border-color: var(--accent-blue);
+        }
+        .chart-card-header {
+            position: relative;
+        }
+
+        .insight-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .insight-item {
+            background: var(--input-bg);
+            padding: 18px;
+            border-radius: 16px;
+            display: flex;
+            gap: 15px;
+            align-items: flex-start;
+            border: 1px solid var(--border-color);
+            transition: 0.2s;
+        }
+        .insight-icon {
+            font-size: 22px;
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+        .insight-text {
+            flex: 1;
+        }
+        .insight-text h4 {
+            font-size: 13px;
+            margin-bottom: 6px;
+            color: var(--text-main);
+            font-weight: bold;
+        }
+        .insight-text p {
+            font-size: 14px;
+            color: var(--text-main);
+            font-weight: normal;
+            line-height: 1.6;
+        }
+        .data-warning {
+            background: var(--input-bg);
+            color: var(--text-muted);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+            border: 1px dashed var(--border-color);
+        }
+        .tag-stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 12px;
+        }
+        .tag-stat-bar-bg {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 2px;
+            margin-bottom: 10px;
+        }
+        .tag-stat-bar-fill {
+            height: 100%;
+            background: var(--accent-red);
+            border-radius: 2px;
+        }
+
+        .timeframe-select {
+            background: var(--input-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-family: 'Vazirmatn';
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+        .timeframe-select option {
+            background: var(--bg-card);
+        }
+
+        .heatmap-legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 10px;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+        .heatmap-legend-bar {
+            width: 80px;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to left, #8b0000, #ff4444, #ff8888, #ffcccc, #fff0f0);
+        }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-around;
+            width: 95%;
+            max-width: 440px;
+            padding: 15px 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            cursor: pointer;
+            flex: 1;
+            gap: 6px;
+            transition: 0.3s;
+        }
+        .nav-item i {
+            font-size: 22px;
+        }
+        .nav-item span {
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .nav-item.active {
+            color: var(--text-main);
+        }
+        .nav-item.active i {
+            color: var(--accent-blue);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 30px 20px;
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-content::-webkit-scrollbar {
+            display: none;
+        }
+        .modal-content h2 {
+            margin-bottom: 10px;
+            font-size: 20px;
+            color: var(--text-main);
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .btn {
+            padding: 14px 20px;
+            border-radius: 14px;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+            font-family: 'Vazirmatn';
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .btn-primary {
+            background: var(--accent-red);
+            color: white;
+        }
+        .btn-secondary {
+            background: var(--accent-blue);
+            color: white;
+        }
+        .btn-cancel {
+            background: var(--input-bg);
+            color: var(--text-main);
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 14px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            border-radius: 14px;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-family: 'Vazirmatn';
+            text-align: center;
+            outline: none;
+            transition: 0.3s;
+        }
+        .modal-input:focus {
+            border-color: var(--accent-blue);
+        }
+        .pin-input {
+            direction: ltr !important;
+            text-align: center;
+            letter-spacing: 15px;
+            font-size: 26px;
+            font-family: monospace;
+            font-weight: bold;
+            padding-left: 30px;
+        }
+
+        .custom-time-spinner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+        .custom-time-spinner button {
+            background: var(--input-bg);
+            border: none;
+            color: var(--text-muted);
+            width: 60px;
+            height: 35px;
+            border-radius: 10px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .custom-time-spinner button:hover,
+        .custom-time-spinner button:active {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--accent-red);
+        }
+        .spinner-val {
+            font-size: 28px;
+            font-weight: 900;
+            color: var(--text-main);
+            font-family: 'Vazirmatn', sans-serif;
+            width: 60px;
+            text-align: center;
+            line-height: 1;
+            margin: 4px 0;
+        }
+
+        .wd-toggle-card {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 16px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: right;
+        }
+        .wd-toggle-card:hover {
+            border-color: rgba(42, 101, 240, 0.5);
+        }
+        .wd-toggle-card.active {
+            background: rgba(42, 101, 240, 0.1);
+            border-color: rgba(42, 101, 240, 0.5);
+        }
+        .wd-icon-box {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--bg-card);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: var(--text-muted);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+        }
+        .wd-toggle-card.active .wd-icon-box {
+            background: var(--accent-blue);
+            color: white;
+            box-shadow: 0 4px 15px rgba(42, 101, 240, 0.3);
+        }
+        .wd-info-box {
+            flex: 1;
+        }
+        .wd-info-box h4 {
+            font-size: 14px;
+            color: var(--text-main);
+            margin-bottom: 2px;
+            transition: 0.3s;
+        }
+        .wd-toggle-card.active .wd-info-box h4 {
+            color: var(--accent-blue);
+            font-weight: bold;
+        }
+        .wd-check-icon {
+            font-size: 22px;
+            color: var(--border-color);
+            transition: 0.3s;
+        }
+        .wd-toggle-card.active .wd-check-icon {
+            color: var(--accent-blue);
+        }
+
+        .btn-delete {
+            width: 100%;
+            margin-top: 15px;
+            padding: 14px;
+            background: rgba(255, 59, 48, 0.05);
+            color: var(--accent-red);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            border-radius: 14px;
+            font-family: 'Vazirmatn';
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-delete:hover {
+            background: rgba(255, 59, 48, 0.15);
+        }
+
+        .settings-group {
+            background: var(--input-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            text-align: right;
+        }
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-size: 14px;
+        }
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        .settings-item.clickable {
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .settings-item.clickable:active {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .settings-item i.action-icon {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .theme-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+        .theme-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--text-muted);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        input:checked+.slider {
+            background-color: var(--accent-blue);
+        }
+        input:checked+.slider:before {
+            transform: translateX(24px);
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        .section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes breatheCycle {
+            0% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+            21% {
+                transform: scale(1.6);
+                opacity: 1;
+            }
+            58% {
+                transform: scale(1.6);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+        }
+        .breathe-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 220px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .breathe-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: var(--accent-blue-grad);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: 0.3s;
+            position: absolute;
+            z-index: 1;
+        }
+        .breathe-text-box {
+            position: relative;
+            z-index: 2;
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            pointer-events: none;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+        .breathe-circle.active {
+            animation: breatheCycle 19s infinite linear;
+        }
+
+        .status-icon-animated {
+            animation: pulseFire 2s infinite;
+        }
+        @keyframes pulseFire {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.2);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Additional styles for export/import textarea */
+        .export-textarea, .import-textarea {
+            width: 100%;
+            height: 120px;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-family: 'Vazirmatn', monospace;
+            font-size: 13px;
+            resize: vertical;
+            text-align: left;
+            direction: ltr;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="lock-screen" class="modal-overlay" style="background: var(--bg-main); z-index: 10000; flex-direction: column;">
+        <div class="modal-content" style="background: transparent; border: none; box-shadow: none;">
+            <i class="fa-solid fa-lock" style="font-size: 50px; color: var(--accent-blue); margin-bottom: 20px;"></i>
+            <h2 style="color: var(--text-main); margin-bottom: 20px;">اراده آهنین</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">جهت ورود رمز عبور خود را وارد کنید.</p>
+            <input type="password" id="unlock-pin-input" class="modal-input pin-input" placeholder="••••" inputmode="numeric" onkeypress="handlePinEnter(event)" maxlength="8">
+            <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="unlockApp()">ورود</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="app-alert-modal" style="z-index: 10005;">
+        <div class="modal-content" style="max-width: 300px;">
+            <i class="fa-solid fa-circle-info" style="font-size: 40px; color: var(--accent-blue); margin-bottom: 15px;"></i>
+            <p id="app-alert-text" style="color: var(--text-main); font-size: 14px; margin-bottom: 20px; line-height: 1.6;"></p>
+            <button class="btn btn-secondary" style="width: 100%;" onclick="closeModal('app-alert-modal')">متوجه شدم</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="app-confirm-modal" style="z-index: 10005;">
+        <div class="modal-content" style="max-width: 320px;">
+            <i class="fa-solid fa-circle-question" style="font-size: 40px; color: var(--accent-red); margin-bottom: 15px;"></i>
+            <p id="app-confirm-text" style="color: var(--text-main); font-size: 14px; margin-bottom: 20px; line-height: 1.6;"></p>
+            <div class="btn-group" style="margin-top: 10px;">
+                <button class="btn btn-primary" onclick="executeConfirm()">بله، مطمئنم</button>
+                <button class="btn btn-cancel" onclick="closeModal('app-confirm-modal')">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="app-container" id="main-app-container" style="display: none;">
+        <header>
+            <h1>اراده آهنین</h1>
+            <div class="header-actions">
+                <div class="settings-icon" onclick="lockAppManual()"><i class="fa-solid fa-lock"></i></div>
+                <div class="settings-icon" onclick="openSettingsModal()"><i class="fa-solid fa-gear"></i></div>
+            </div>
+        </header>
+
+        <div id="dashboard" class="section active">
+
+            <div class="card timer-card">
+                <div id="empty-state-view" style="display: none; padding: 20px 0;">
+                    <i class="fa-solid fa-person-walking-arrow-right" style="font-size: 50px; color: var(--accent-blue); margin-bottom: 15px;"></i>
+                    <h2 style="font-size: 20px; margin-bottom: 10px;">آماده تغییر هستی؟</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 25px; line-height: 1.6;">سفر هزار فرسنگی با اولین قدم آغاز می‌شود. روی دکمه زیر کلیک کن تا زمان‌سنج پاکی تو فعال شود.</p>
+                    <button class="start-btn" onclick="startJourney()">🚀 شروع سفر پاکی</button>
+                </div>
+
+                <div id="active-state-view">
+                    <div class="timer-title">زمان سپری شده از آخرین لغزش</div>
+                    <div class="timer-display">
+                        <div class="time-box"><span class="time-val" id="val-days">0</span><span class="time-label">روز</span></div>
+                        <div class="time-box"><span class="time-val">:</span></div>
+                        <div class="time-box"><span class="time-val" id="val-hours">00</span><span class="time-label">ساعت</span></div>
+                        <div class="time-box"><span class="time-val">:</span></div>
+                        <div class="time-box"><span class="time-val" id="val-mins">00</span><span class="time-label">دقیقه</span></div>
+                        <div class="time-box"><span class="time-val">:</span></div>
+                        <div class="time-box"><span class="time-val" id="val-secs" style="color:var(--text-muted)">00</span><span class="time-label">ثانیه</span></div>
+                    </div>
+
+                    <div style="display:flex; gap:10px; justify-content:center; width:100%;">
+                        <button class="reset-btn" style="flex:1;" onclick="openInstantResetModal()"><i class="fa-solid fa-bolt"></i> ثبت لغزش (همین الان)</button>
+                    </div>
+                    <button class="undo-btn" onclick="undoLastSlip()"><i class="fa-solid fa-rotate-left"></i> بازگردانی آخرین لغزش</button>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 15px; margin-bottom: 16px;">
+                <div class="card" style="flex: 1; text-align: center; padding: 15px; margin-bottom: 0;">
+                    <i class="fa-solid fa-trophy" style="color: var(--accent-gold); font-size: 26px; margin-bottom: 12px;"></i>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">بهترین رکورد</div>
+                    <div style="font-size: 18px; font-weight: bold" id="best-record">0 روز</div>
+                </div>
+                <div class="card" style="flex: 1; text-align: center; padding: 15px; margin-bottom: 0;">
+                    <i id="current-status-icon" class="fa-solid fa-fire status-icon-animated" style="color: #ff9500; font-size: 26px; margin-bottom: 12px;"></i>
+                    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 5px;">وضعیت فعلی</div>
+                    <div style="font-size: 16px; font-weight: bold" id="current-status-text">-</div>
+                </div>
+            </div>
+
+            <div class="card coach-card" id="coach-wrapper" style="display: none;">
+                <div class="card-title-icon" style="color: var(--accent-blue)"><i class="fa-solid fa-robot"></i> مربی هوشمند</div>
+                <p id="coach-message" style="font-size: 13px; color: var(--text-main); line-height: 1.7;"></p>
+            </div>
+
+            <div class="card bio-card" id="bio-card" style="display: none;">
+                <div class="card-title-icon" style="color: var(--accent-green)"><i class="fa-solid fa-heart-pulse"></i> اتفاقات بدن شما</div>
+                <p id="bio-message" style="font-size: 13px; color: var(--text-main); line-height: 1.7;"></p>
+            </div>
+
+            <div class="card urge-card" onclick="openPanicModal()">
+                <h3>وسوسه شدی؟</h3>
+                <p>این یک حس گذراست. روی این کارت کلیک کن تا با تمرین تنفسی کنترل را به دست بگیری.</p>
+            </div>
+
+            <div class="card help-card">
+                <div class="help-header" onclick="toggleHelp()">
+                    <div class="card-title-icon" style="margin:0; color:var(--text-main);"><i class="fa-solid fa-book-open"></i> راهنمای استفاده</div>
+                    <i class="fa-solid fa-chevron-down" id="help-chevron" style="color:var(--text-muted); transition:0.3s;"></i>
+                </div>
+                <div class="help-content" id="help-content">
+                    <div class="help-content-inner">
+                        <p style="margin-bottom:10px; font-weight:bold; color:var(--text-main);">آشنایی با بخش‌های برنامه:</p>
+                        <ul>
+                            <li><b style="color:var(--accent-green)">تقویم (رنگ سبز):</b> نشان‌دهنده روزهای کاملاً پاک شما پس از شروع مسیر است.</li>
+                            <li><b style="color:var(--accent-red)">تقویم (رنگ قرمز):</b> روزهایی که لغزش در آن‌ها ثبت شده است.</li>
+                            <li><b style="color:var(--accent-blue)">تقویم (قطره آبی - احتلام):</b> نشان‌دهنده احتلام طبیعی. <i>(توضیح کامل در ادامه)</i></li>
+                            <li><b>دکمه اورژانس (وسوسه شدی؟):</b> در مواقع هوس شدید، این دکمه را بزنید تا با تکنیک تنفسی ۴-۷-۸ سیستم عصبی خود را آرام کنید.</li>
+                            <li><b>بخش اهداف:</b> می‌توانید اهداف شخصی (مثلاً ۳۰ روز) تنظیم کنید و با پیشرفت شما، مدال‌ها پر می‌شوند.</li>
+                            <li><b>بخش آنالیز:</b> با استفاده از برچسب‌هایی (تگ) که هنگام ثبت لغزش انتخاب می‌کنید، این بخش دلایل اصلی شکست شما را ریشه‌یابی می‌کند.</li>
+                            <li><b>تنظیمات (قفل و بکاپ):</b> می‌توانید برای برنامه رمز عبور بگذارید یا از اطلاعات خود فایل پشتیبان (Backup) بگیرید.</li>
+                        </ul>
+
+                        <p style="margin-top:15px; margin-bottom:10px; font-weight:bold; color:var(--text-main); border-top: 1px solid var(--border-color); padding-top: 15px;">
+                            <i class="fa-solid fa-droplet" style="color:var(--accent-blue)"></i> درباره احتلام (Wet Dream):
+                        </p>
+                        <p style="line-height: 1.8;">
+                            احتلام یا خروج منی در خواب، یک واکنش کاملاً طبیعی و بیولوژیکِ بدن برای تخلیه و نوسازی سیستم تولید مثل است. این اتفاق به هیچ وجه نشانه ضعف اراده یا لغزش نیست. ثبت احتلام در برنامه، <b>تایمر پاکی شما را صفر نمی‌کند</b> و صرفاً برای پایش سلامت بدن و تنظیم پیام‌های مربی هوشمند استفاده می‌شود. از این فرآیند احساس عذاب وجدان نداشته باشید.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="calendar" class="section">
+            <div class="card">
+                <div class="calendar-header">
+                    <button class="reset-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-right"></i></button>
+                    <h3 id="month-name">...</h3>
+                    <button class="reset-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-left"></i></button>
+                </div>
+                <div class="weekdays">
+                    <span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span>
+                </div>
+                <div class="days-grid" id="calendar-grid"></div>
+            </div>
+            <div id="cal-hint-box">
+                <p style="font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 10px; line-height: 1.6;">
+                    رنگ سبز: روزهای پاکِ <b>پس از اولین لغزش</b><br>رنگ قرمز: لغزش | <span style="color:var(--accent-blue); font-weight:bold;">قطره آبی: احتلام</span><br>
+                    با کلیک روی روزها اطلاعات را مدیریت کنید.
+                </p>
+            </div>
+        </div>
+
+        <div id="goals" class="section">
+            <div id="goals-content-wrapper" style="display:none;">
+                <div class="card" style="background: linear-gradient(145deg, rgba(42, 101, 240, 0.05) 0%, var(--bg-card) 100%); border-color: rgba(42, 101, 240, 0.2);">
+                    <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 15px;">
+                        <i class="fa-solid fa-bullseye" style="font-size: 26px; color: var(--accent-blue);"></i>
+                        <div>
+                            <h4 style="font-size: 15px; font-weight: bold; margin-bottom: 2px;">هدف شخصی بسازید</h4>
+                            <p style="font-size: 11px; color: var(--text-muted);">چند روز می‌خواهید پاک بمانید؟</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="number" id="custom-goal-days" class="goal-input" placeholder="مثلاً ۴۵" style="width:100%;">
+                        <button class="goal-btn" onclick="addCustomGoal()"><i class="fa-solid fa-plus"></i> ثبت</button>
+                    </div>
+                </div>
+
+                <div id="custom-goals-wrapper" style="display: none;">
+                    <div class="card" style="margin-bottom: 16px;">
+                        <h3 style="margin-bottom: 20px; font-size: 15px; color: var(--accent-blue); display: flex; align-items: center; gap: 8px;">
+                            <i class="fa-solid fa-flag-checkered"></i> اهداف شخصی شما
+                        </h3>
+                        <div id="custom-badges-container"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3 style="margin-bottom: 15px; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i class="fa-solid fa-medal" style="color: var(--accent-gold)"></i> دستاوردها و اهداف سیستم
+                    </h3>
+                    <div id="badges-container"></div>
+                </div>
+            </div>
+            <div id="goals-empty-msg" class="data-warning" style="margin-top:20px; display:none;">برای مشاهده اهداف، در صفحه خانه روی دکمه «شروع سفر پاکی» کلیک کنید.</div>
+        </div>
+
+        <div id="insights" class="section">
+
+            <div class="card chart-card-header" style="margin-bottom: 25px;">
+                <h3 style="margin-bottom: 5px; font-size: 16px;">نمودار پیشرفت دوره‌ها (روز)</h3>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px;">مقایسه طول دوره‌های پاکی. برای جابه‌جایی بین نمودارها سوایپ کنید یا روی نقطه‌ها کلیک کنید.</p>
+                <button class="chart-export-btn" title="دانلود نمودار خطی (PNG)" onclick="exportChartAsPNG()"><i class="fa-solid fa-download"></i></button>
+                <div id="chart-warning" style="display:none;" class="data-warning">داده‌های فعلی برای رسم نمودار کافی نیست.</div>
+                <div class="chart-slider-wrapper" id="chart-slider-wrapper">
+                    <div class="chart-slider-inner" id="chart-slider-inner">
+                        <div class="chart-slide" id="chart-slide-bar"><canvas id="progressChartBar"></canvas></div>
+                        <div class="chart-slide" id="chart-slide-line"><canvas id="progressChartLine"></canvas></div>
+                    </div>
+                </div>
+                <div class="chart-dots" id="chart-dots">
+                    <span class="chart-dot active" data-slide="0" onclick="switchChartSlideTo(0)"></span>
+                    <span class="chart-dot" data-slide="1" onclick="switchChartSlideTo(1)"></span>
+                </div>
+            </div>
+
+            <div class="card" style="margin-bottom: 25px;" id="heatmap-card">
+                <h3 style="margin-bottom: 5px; font-size: 16px;">هیت‌مپ ساعات لغزش</h3>
+                <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 5px;" id="heatmap-peak-text">در حال محاسبه...</p>
+                <div class="chart-container" style="height:180px;">
+                    <canvas id="heatmapChart"></canvas>
+                </div>
+                <div class="heatmap-legend">
+                    <span>کم</span>
+                    <div class="heatmap-legend-bar"></div>
+                    <span>زیاد</span>
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin: 0 0 15px 5px;">
+                <h3 style="font-size: 16px; color: var(--text-main); margin:0;">آمار پیشرفته</h3>
+                <select id="stat-timeframe" class="timeframe-select" onchange="calculateStatsAndChart()">
+                    <option value="all">از اولین لغزش</option>
+                    <option value="7">۷ روز گذشته</option>
+                    <option value="14">۱۴ روز گذشته</option>
+                    <option value="30">۱ ماه گذشته</option>
+                    <option value="90">۳ ماه گذشته</option>
+                    <option value="180">۶ ماه گذشته</option>
+                    <option value="365">۱ سال گذشته</option>
+                </select>
+            </div>
+
+            <div class="stats-grid" id="main-stats-grid">
+                <div class="stat-box">
+                    <i class="fa-solid fa-bolt" style="color: var(--accent-red)"></i>
+                    <div class="val" id="stat-total-slips">-</div>
+                    <div class="label">تعداد لغزش‌ها</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fa-solid fa-trophy" style="color: var(--accent-gold)"></i>
+                    <div class="val" id="stat-max-streak">-</div>
+                    <div class="label">بیشترین فاصله (روز)</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fa-solid fa-stopwatch" style="color: var(--text-muted)"></i>
+                    <div class="val" id="stat-min-streak">-</div>
+                    <div class="label">کمترین فاصله (روز)</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fa-solid fa-chart-line" style="color: var(--accent-blue)"></i>
+                    <div class="val" id="stat-avg-streak">-</div>
+                    <div class="label">میانگین فاصله (روز)</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fa-solid fa-shield-halved" style="color: var(--accent-green)"></i>
+                    <div class="val" id="stat-success-rate">-</div>
+                    <div class="label">درصد روزهای پاک</div>
+                </div>
+                <div class="stat-box">
+                    <i class="fa-solid fa-droplet" style="color: var(--accent-blue)"></i>
+                    <div class="val" id="stat-total-wd">-</div>
+                    <div class="label">تعداد احتلام</div>
+                </div>
+            </div>
+
+            <h3 style="margin: 25px 0 15px 5px; font-size: 16px; color: var(--text-main)">تحلیل داده‌های شما</h3>
+
+            <div class="insight-list">
+
+                <div class="insight-item">
+                    <div class="insight-icon" style="color: var(--accent-red)"><i class="fa-solid fa-brain"></i></div>
+                    <div class="insight-text" style="width: 100%;">
+                        <h4>ریشه‌های روانشناختی لغزش</h4>
+                        <div id="insight-trigger">در حال جمع‌آوری داده...</div>
+                    </div>
+                </div>
+
+                <div class="insight-item">
+                    <div class="insight-icon" style="color: var(--accent-red)"><i class="fa-solid fa-rotate-right"></i></div>
+                    <div class="insight-text">
+                        <h4>تله اثر تعقیب‌کننده (Chaser Effect)</h4>
+                        <div id="insight-chaser">در حال جمع‌آوری داده...</div>
+                    </div>
+                </div>
+
+                <div class="insight-item">
+                    <div class="insight-icon" style="color: var(--accent-gold)"><i class="fa-solid fa-clock"></i></div>
+                    <div class="insight-text">
+                        <h4>الگوی زمانی در طول روز</h4>
+                        <p id="insight-timeofday">در حال جمع‌آوری داده...</p>
+                    </div>
+                </div>
+
+                <div class="insight-item" id="insight-wd-wrapper" style="display: none;">
+                    <div class="insight-icon"><i class="fa-solid fa-droplet" style="color: var(--accent-blue)"></i></div>
+                    <div class="insight-text">
+                        <h4>آمار احتلام (طبیعی)</h4>
+                        <p id="insight-wd">در حال جمع‌آوری داده...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchTab('dashboard', this)"><i class="fa-solid fa-house"></i><span>خانه</span></div>
+        <div class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-regular fa-calendar"></i><span>تقویم</span></div>
+        <div class="nav-item" onclick="switchTab('goals', this)"><i class="fa-solid fa-bullseye"></i><span>اهداف</span></div>
+        <div class="nav-item" onclick="switchTab('insights', this)"><i class="fa-solid fa-chart-bar"></i><span>آنالیز</span></div>
+    </nav>
+
+    <div class="modal-overlay" id="settings-modal">
+        <div class="modal-content" style="text-align: right; padding: 25px;">
+            <h2 style="text-align: center; margin-bottom: 25px;">تنظیمات</h2>
+            <div class="settings-group">
+                <div class="settings-item">
+                    <span>تم روشن (Light Mode)</span>
+                    <label class="theme-switch" for="theme-checkbox">
+                        <input type="checkbox" id="theme-checkbox" onchange="toggleTheme()">
+                        <div class="slider"></div>
+                    </label>
+                </div>
+            </div>
+            <div class="settings-group">
+                <div class="settings-item clickable" id="setting-pin-btn" onclick="handlePinSettingsClick()">
+                    <span id="setting-pin-text">فعال‌سازی رمز عبور</span>
+                    <i class="fa-solid fa-chevron-left action-icon"></i>
+                </div>
+            </div>
+            <div class="settings-group">
+                <div class="settings-item clickable" onclick="openExportModal()">
+                    <span>تهیه نسخه پشتیبان (Export)</span>
+                    <i class="fa-solid fa-download action-icon"></i>
+                </div>
+                <div class="settings-item clickable" onclick="openImportModal()">
+                    <span>بازیابی اطلاعات (Import)</span>
+                    <i class="fa-solid fa-upload action-icon"></i>
+                </div>
+            </div>
+            <div class="settings-group" style="border: 1px solid rgba(255, 59, 48, 0.3);">
+                <div class="settings-item clickable" style="color: var(--accent-red); font-weight: bold; justify-content: center;" onclick="openHardResetModal()">
+                    ⚠️ پاک کردن تمام اطلاعات برنامه
+                </div>
+            </div>
+            <button class="btn btn-cancel" style="width:100%; margin-top:10px;" onclick="closeModal('settings-modal')">بستن</button>
+        </div>
+    </div>
+
+    <!-- Export Modal (Text-based) -->
+    <div class="modal-overlay" id="export-modal">
+        <div class="modal-content" style="text-align: right; max-width: 400px;">
+            <h2 style="text-align: center;">خروجی اطلاعات</h2>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">می‌توانید متن زیر را کپی کنید یا فایل دانلود کنید.</p>
+            <textarea id="export-textarea" class="export-textarea" readonly></textarea>
+            <div class="btn-group" style="flex-wrap: wrap;">
+                <button class="btn btn-secondary" onclick="copyExportToClipboard()"><i class="fa-solid fa-copy"></i> کپی</button>
+                <button class="btn btn-cancel" onclick="downloadExportFile()"><i class="fa-solid fa-download"></i> دانلود فایل</button>
+                <button class="btn btn-cancel" onclick="closeModal('export-modal')" style="flex: 0 0 auto;">بستن</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal (Text + File) -->
+    <div class="modal-overlay" id="import-modal">
+        <div class="modal-content" style="text-align: right; max-width: 400px;">
+            <h2 style="text-align: center;">بازیابی اطلاعات</h2>
+            <p style="color: var(--text-muted); font-size: 12px; margin-bottom: 10px;">می‌توانید متن JSON را بچسبانید یا فایل انتخاب کنید.</p>
+            <textarea id="import-textarea" class="import-textarea" placeholder="داده JSON را اینجا بچسبانید..."></textarea>
+            <div class="btn-group" style="flex-wrap: wrap; margin-bottom: 10px;">
+                <button class="btn btn-secondary" onclick="importFromText()"><i class="fa-solid fa-paste"></i> بارگذاری از متن</button>
+                <button class="btn btn-cancel" onclick="document.getElementById('import-file-input').click()"><i class="fa-solid fa-folder-open"></i> انتخاب فایل</button>
+            </div>
+            <input type="file" id="import-file-input" style="display: none;" accept=".json" onchange="importFromFile(event)">
+            <button class="btn btn-cancel" style="width:100%;" onclick="closeModal('import-modal')">انصراف</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="hard-reset-modal" style="z-index: 1005;">
+        <div class="modal-content">
+            <h2 style="color: var(--accent-red);"><i class="fa-solid fa-triangle-exclamation"></i> اخطار نهایی</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px; line-height: 1.6;">تمام رکوردهای شما برای همیشه پاک خواهد شد. برای تایید، کلمه <b>تایید</b> را در کادر زیر بنویسید.</p>
+            <input type="text" id="reset-confirm-input" class="modal-input" placeholder="تایید" onkeyup="checkResetInput()">
+            <div class="btn-group">
+                <button class="btn btn-primary" id="btn-confirm-reset" disabled style="opacity: 0.5; cursor: not-allowed;" onclick="executeFactoryReset()">حذف کامل</button>
+                <button class="btn btn-cancel" onclick="closeModal('hard-reset-modal')">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="pin-setup-modal" style="z-index: 1005;">
+        <div class="modal-content">
+            <h2 style="color: var(--text-main);">تنظیم رمز عبور</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">یک رمز عددی (حداقل ۴ رقم) وارد کنید.</p>
+            <input type="password" id="new-pin-input" class="modal-input pin-input" placeholder="••••" inputmode="numeric" maxlength="8">
+            <div class="btn-group">
+                <button class="btn btn-secondary" onclick="saveNewPin()">ذخیره رمز</button>
+                <button class="btn btn-cancel" onclick="closeModal('pin-setup-modal')">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="pin-verify-modal" style="z-index: 1005;">
+        <div class="modal-content">
+            <h2 style="color: var(--text-main);">تایید هویت</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">برای حذف رمز، ابتدا رمز فعلی را وارد کنید.</p>
+            <input type="password" id="verify-pin-input" class="modal-input pin-input" placeholder="••••" inputmode="numeric" maxlength="8">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="verifyAndRemovePin()">حذف رمز</button>
+                <button class="btn btn-cancel" onclick="closeModal('pin-verify-modal')">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="instant-reset-modal">
+        <div class="modal-content">
+            <h2>ثبت لغزش</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">تایمر از همین ثانیه صفر خواهد شد.</p>
+            <p style="text-align: right; font-size: 12px; color: var(--text-main); margin-bottom: 8px; font-weight:bold;">علت لغزش چه بود؟ (اختیاری)</p>
+            <div class="tags-container" id="instant-tags">
+                <div class="tag-btn" onclick="toggleTag(this)" data-tag="visual">🔞 محتوای تحریک‌کننده</div>
+                <div class="tag-btn" onclick="toggleTag(this)" data-tag="stress">😰 استرس و اضطراب</div>
+                <div class="tag-btn" onclick="toggleTag(this)" data-tag="tired">😴 خستگی / بی‌خوابی</div>
+                <div class="tag-btn" onclick="toggleTag(this)" data-tag="lonely">🚶‍♂️ تنهایی / بی‌حوصلگی</div>
+                <div class="tag-btn" onclick="toggleTag(this)" data-tag="anger">😡 خشم / ناراحتی</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="confirmInstantReset()">ثبت شکست</button>
+                <button class="btn btn-cancel" onclick="closeModal('instant-reset-modal')">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="date-specific-modal">
+        <div class="modal-content" style="padding: 0; max-width: 420px; width: 95%; border-radius: 24px; background: var(--bg-main); border: 1px solid var(--border-color); display: flex; flex-direction: column; max-height: 90vh; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+            <div style="background: var(--bg-card); padding: 20px; position: relative; border-bottom: 1px solid var(--border-color); border-radius: 24px 24px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <div style="text-align: right;">
+                    <h2 style="margin-bottom: 0; font-size: 18px; color: var(--text-main);">مدیریت اطلاعات روز</h2>
+                    <div id="selected-date-text" style="color: var(--accent-blue); font-size: 13px; font-weight: bold; margin-top: 5px;"></div>
+                </div>
+                <div style="cursor: pointer; color: var(--text-muted); width: 38px; height: 38px; display: flex; justify-content: center; align-items: center; background: var(--input-bg); border-radius: 50%; transition: 0.2s;" onclick="closeModal('date-specific-modal')">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </div>
+            </div>
+            <div style="padding: 20px; overflow-y: auto; flex: 1;">
+                <div style="background: var(--bg-card); border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid var(--border-color);">
+                    <h3 style="font-size: 15px; color: var(--accent-red); margin-bottom: 15px; text-align: right;"><i class="fa-solid fa-bolt"></i> ثبت لغزش (شکست)</h3>
+                    <p style="text-align: right; font-size: 12px; color: var(--text-muted); margin-bottom: 12px;"><i class="fa-regular fa-clock"></i> زمان دقیق:</p>
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 15px; direction: ltr; margin-bottom: 20px;">
+                        <div class="custom-time-spinner">
+                            <button onclick="adjustTime('h', 1)"><i class="fa-solid fa-chevron-up"></i></button>
+                            <div id="custom-h-disp" class="spinner-val">00</div>
+                            <button onclick="adjustTime('h', -1)"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                        <div style="font-size: 30px; font-weight: bold; color: var(--border-color); margin-top: -5px;">:</div>
+                        <div class="custom-time-spinner">
+                            <button onclick="adjustTime('m', 1)"><i class="fa-solid fa-chevron-up"></i></button>
+                            <div id="custom-m-disp" class="spinner-val">00</div>
+                            <button onclick="adjustTime('m', -1)"><i class="fa-solid fa-chevron-down"></i></button>
+                        </div>
+                    </div>
+                    <p style="text-align: right; font-size: 12px; color: var(--text-muted); margin-bottom: 12px;"><i class="fa-solid fa-tags"></i> علت لغزش (اختیاری):</p>
+                    <div class="tags-container" id="specific-tags" style="justify-content: flex-start; margin-bottom: 20px;">
+                        <div class="tag-btn" onclick="toggleTag(this)" data-tag="visual">🔞 محتوای تحریک‌کننده</div>
+                        <div class="tag-btn" onclick="toggleTag(this)" data-tag="stress">😰 استرس و اضطراب</div>
+                        <div class="tag-btn" onclick="toggleTag(this)" data-tag="tired">😴 خستگی / بی‌خوابی</div>
+                        <div class="tag-btn" onclick="toggleTag(this)" data-tag="lonely">🚶‍♂️ تنهایی / بی‌حوصلگی</div>
+                        <div class="tag-btn" onclick="toggleTag(this)" data-tag="anger">😡 خشم / ناراحتی</div>
+                    </div>
+                    <button class="btn btn-primary" id="btn-save-slip" onclick="confirmDateSpecificReset()" style="width: 100%; box-shadow: 0 4px 15px rgba(255, 59, 48, 0.2);"><i class="fa-solid fa-check"></i> ذخیره لغزش</button>
+                    <button id="btn-delete-slip" class="btn-delete" style="margin-top: 15px; display: none;" onclick="deleteDateSpecificReset()">
+                        <i class="fa-solid fa-trash"></i> حذف این لغزش
+                    </button>
+                </div>
+                <div style="background: var(--bg-card); border-radius: 20px; padding: 20px; border: 1px solid var(--border-color);">
+                    <h3 style="font-size: 15px; color: var(--accent-blue); margin-bottom: 10px; text-align: right;"><i class="fa-solid fa-droplet"></i> ثبت احتلام (طبیعی)</h3>
+                    <p style="text-align: right; font-size: 11px; color: var(--text-muted); margin-bottom: 15px; line-height: 1.6;">احتلام روند طبیعی بدن است و تایمر پاکی شما را صفر نمی‌کند. نیازی به پر کردن فرم بالا نیست.</p>
+                    <div id="wd-toggle-container" class="wd-toggle-card" onclick="toggleWetDream()">
+                        <div class="wd-icon-box"><i class="fa-solid fa-bed"></i></div>
+                        <div class="wd-info-box">
+                            <h4 id="wd-toggle-text">احتلام در این روز ثبت شود</h4>
+                        </div>
+                        <i id="wd-check-icon" class="fa-regular fa-circle wd-check-icon"></i>
+                    </div>
+                </div>
+            </div>
+            <div style="padding: 15px 20px; background: var(--bg-card); border-top: 1px solid var(--border-color); border-radius: 0 0 24px 24px;">
+                <button class="btn btn-cancel" onclick="closeModal('date-specific-modal')" style="width: 100%; font-size: 15px; padding: 16px;">بازگشت به تقویم</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="panic-modal">
+        <div class="modal-content" style="background: #111; border: none;">
+            <h2 style="color: white; margin-bottom: 5px;">تکنیک تنفسی ۴-۷-۸</h2>
+            <p style="color: #aaa; margin-bottom: 30px; font-size: 13px;">این تمرین سیستم عصبی را آرام کرده و هوس را کاهش می‌دهد.</p>
+            <div class="breathe-container">
+                <div class="breathe-circle" id="breathe-circle"></div>
+                <div class="breathe-text-box" id="breathe-text">آماده...</div>
+            </div>
+            <p id="breathe-desc" style="color: var(--accent-blue); font-weight: bold; height: 20px;">برای شروع دکمه را بزنید</p>
+            <div class="btn-group" style="margin-top: 25px;">
+                <button class="btn btn-secondary" id="btn-start-breathe" onclick="startBreathing()">شروع تمرین</button>
+                <button class="btn btn-cancel" style="background: #333; color: white;" onclick="closePanicModal()">خروج</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Jalali Calendar Functions ---
+        function g2j(gy, gm, gd) {
+            var g_d_m = [0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334];
+            var jy = (gy <= 1600) ? 0 : 979;
+            gy -= (gy <= 1600) ? 621 : 1600;
+            var gy2 = (gm > 2) ? (gy + 1) : gy;
+            var days = (365 * gy) + parseInt((gy2 + 3) / 4) - parseInt((gy2 + 99) / 100) + parseInt((gy2 + 399) / 400) -
+                80 + gd + g_d_m[gm - 1];
+            jy += 33 * parseInt(days / 12053);
+            days %= 12053;
+            jy += 4 * parseInt(days / 1461);
+            days %= 1461;
+            jy += parseInt((days - 1) / 365);
+            if (days > 365) days = (days - 1) % 365;
+            var jm = (days < 186) ? 1 + parseInt(days / 31) : 7 + parseInt((days - 186) / 30);
+            var jd = 1 + ((days < 186) ? (days % 31) : ((days - 186) % 30));
+            return [jy, jm, jd];
+        }
+
+        function j2g(jy, jm, jd) {
+            var gy = (jy <= 979) ? 621 : 1600;
+            jy -= (jy <= 979) ? 0 : 979;
+            var days = (365 * jy) + ((parseInt(jy / 33)) * 8) + parseInt(((jy % 33) + 3) / 4) + 78 + jd + ((jm < 7) ? (
+                jm - 1) * 31 : ((jm - 7) * 30) + 186);
+            gy += 400 * parseInt(days / 146097);
+            days %= 146097;
+            if (days > 36524) { gy += 100 * parseInt(--days / 36524);
+                days %= 36524; if (days >= 365) days++; }
+            gy += 4 * parseInt(days / 1461);
+            days %= 1461;
+            gy += parseInt((days - 1) / 365);
+            if (days > 365) days = (days - 1) % 365;
+            var gd = days + 1;
+            var leap = ((gy % 4 === 0 && gy % 100 !== 0) || (gy % 400 === 0)) ? 1 : 0;
+            var g_d_m = [0, 31, 28 + leap, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            var gm = 0;
+            while (gm < 13 && gd > g_d_m[gm]) { gd -= g_d_m[gm];
+                gm++; }
+            return [gy, gm, gd];
+        }
+
+        // --- State & Initialization ---
+        let appData = JSON.parse(localStorage.getItem('ironWillData')) || {
+            isStarted: false,
+            installDate: null,
+            startDate: null,
+            slips: [],
+            customGoals: [],
+            wetDreams: [],
+            theme: 'dark',
+            pin: null
+        };
+
+        if (appData.installDate !== null && appData.isStarted === undefined) appData.isStarted = true;
+        if (!appData.customGoals) appData.customGoals = [];
+        if (!appData.wetDreams) appData.wetDreams = [];
+        if (!appData.theme) appData.theme = 'dark';
+        if (appData.pin === undefined) appData.pin = null;
+
+        appData.slips.forEach(s => {
+            if (s.tags === undefined) { s.tags = []; if (s.hasTrigger) s.tags.push('visual'); }
+        });
+        if (appData.slips.length > 0 && appData.slips[0].date < appData.installDate) appData.installDate = appData.slips[
+        0].date;
+
+        const tagNames = { 'visual': 'محتوای تحریک‌کننده', 'stress': 'استرس و اضطراب', 'tired': 'خستگی/بی‌خوابی',
+            'lonely': 'تنهایی', 'anger': 'خشم/ناراحتی' };
+
+        let chartInstanceBar = null;
+        let chartInstanceLine = null;
+        let chartInstanceHeatmap = null;
+        let currentChartSlide = 0;
+        let selectedGregorianForSlip = null;
+        let customTimeH = 0;
+        let customTimeM = 0;
+
+        const todayG = new Date();
+        const todayJ = g2j(todayG.getFullYear(), todayG.getMonth() + 1, todayG.getDate());
+        let currentJy = todayJ[0],
+            currentJm = todayJ[1];
+
+        const predefinedGoals = [
+            { id: 1, days: 3, title: "شروعی تازه", icon: "fa-seedling", color: "#cd7f32" },
+            { id: 2, days: 7, title: "یک هفته پاکی", icon: "fa-leaf", color: "#c0c0c0" },
+            { id: 3, days: 21, title: "تثبیت عادت", icon: "fa-star", color: "#ffd700" },
+            { id: 4, days: 40, title: "اراده راسخ", icon: "fa-fire", color: "#ff6b6b" },
+            { id: 5, days: 90, title: "تولد دوباره", icon: "fa-gem", color: "#00ffff" }
+        ];
+
+        function saveData() { localStorage.setItem('ironWillData', JSON.stringify(appData));
+            updateAllSections(); }
+
+        // --- Custom Alerts & Confirms ---
+        let confirmCallback = null;
+
+        function appAlert(msg) {
+            document.getElementById('app-alert-text').innerHTML = msg;
+            document.getElementById('app-alert-modal').classList.add('active');
+        }
+
+        function appConfirm(msg, callback) {
+            document.getElementById('app-confirm-text').innerHTML = msg;
+            confirmCallback = callback;
+            document.getElementById('app-confirm-modal').classList.add('active');
+        }
+
+        function executeConfirm() { closeModal('app-confirm-modal'); if (confirmCallback) confirmCallback(); }
+
+        // --- Security & PIN ---
+        function initApp() {
+            applyTheme();
+            if (appData.pin) { document.getElementById('lock-screen').style.display = 'flex'; } else { unlockAppSuccess
+            (); }
+        }
+
+        function unlockApp() {
+            const inputVal = document.getElementById('unlock-pin-input').value;
+            if (inputVal === appData.pin) { unlockAppSuccess(); } else { appAlert('رمز عبور اشتباه است!'); document
+                    .getElementById('unlock-pin-input').value = ''; }
+        }
+
+        function handlePinEnter(e) { if (e.key === 'Enter') unlockApp(); }
+
+        function unlockAppSuccess() {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('unlock-pin-input').value = '';
+            document.getElementById('main-app-container').style.display = 'block';
+            updateAllSections();
+            initChartSwipe();
+        }
+
+        function lockAppManual() {
+            if (!appData.pin) return appAlert("برای استفاده از قفل دستی، ابتدا در بخش تنظیمات رمز عبور تعیین کنید.");
+            document.getElementById('main-app-container').style.display = 'none';
+            document.getElementById('lock-screen').style.display = 'flex';
+        }
+
+        // --- Settings ---
+        function applyTheme() {
+            if (appData.theme === 'light') document.body.classList.add('theme-light');
+            else document.body.classList.remove('theme-light');
+            const checkbox = document.getElementById('theme-checkbox');
+            if (checkbox) checkbox.checked = (appData.theme === 'light');
+        }
+
+        function toggleTheme() {
+            const checkbox = document.getElementById('theme-checkbox');
+            appData.theme = checkbox.checked ? 'light' : 'dark';
+            applyTheme();
+            saveData();
+            if (chartInstanceBar || chartInstanceLine) renderAllCharts();
+        }
+
+        function openSettingsModal() { renderPinSettings();
+            document.getElementById('settings-modal').classList.add('active'); }
+
+        function handlePinSettingsClick() {
+            if (appData.pin) {
+                document.getElementById('verify-pin-input').value = '';
+                closeModal('settings-modal');
+                document.getElementById('pin-verify-modal').classList.add('active');
+            } else { openPinSetupModal(); }
+        }
+
+        function renderPinSettings() {
+            const btnText = document.getElementById('setting-pin-text');
+            if (appData.pin) { btnText.innerText = "حذف رمز عبور فعلی";
+                btnText.style.color = "var(--accent-red)"; } else { btnText.innerText =
+                "فعال‌سازی رمز عبور";
+                btnText.style.color = "var(--text-main)"; }
+        }
+
+        function openPinSetupModal() { document.getElementById('new-pin-input').value = '';
+            closeModal('settings-modal');
+            document.getElementById('pin-setup-modal').classList.add('active'); }
+
+        function saveNewPin() {
+            const val = document.getElementById('new-pin-input').value;
+            if (val.length < 4) return appAlert('رمز باید حداقل ۴ رقم باشد.');
+            appData.pin = val;
+            saveData();
+            closeModal('pin-setup-modal');
+            appAlert('رمز عبور با موفقیت تنظیم شد.');
+        }
+
+        function verifyAndRemovePin() {
+            const val = document.getElementById('verify-pin-input').value;
+            if (val === appData.pin) {
+                appData.pin = null;
+                saveData();
+                closeModal('pin-verify-modal');
+                appAlert('رمز عبور با موفقیت حذف شد.');
+            } else {
+                appAlert('رمز عبور وارد شده اشتباه است.');
+                document.getElementById('verify-pin-input').value = '';
+            }
+        }
+
+        function openHardResetModal() {
+            document.getElementById('reset-confirm-input').value = '';
+            checkResetInput();
+            closeModal('settings-modal');
+            document.getElementById('hard-reset-modal').classList.add('active');
+        }
+
+        function checkResetInput() {
+            const val = document.getElementById('reset-confirm-input').value;
+            const btn = document.getElementById('btn-confirm-reset');
+            if (val === 'تایید') { btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer'; } else { btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed'; }
+        }
+
+        function executeFactoryReset() { localStorage.removeItem('ironWillData');
+            location.reload(); }
+
+        // --- Export / Import with Text & File ---
+        function openExportModal() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            document.getElementById('export-textarea').value = dataStr;
+            document.getElementById('export-modal').classList.add('active');
+            closeModal('settings-modal');
+        }
+
+        function copyExportToClipboard() {
+            const textarea = document.getElementById('export-textarea');
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            document.execCommand('copy');
+            appAlert('متن با موفقیت کپی شد.');
+        }
+
+        function downloadExportFile() {
+            const dataStr = JSON.stringify(appData);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "iron_will_backup.json";
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => { document.body.removeChild(a);
+                window.URL.revokeObjectURL(url); }, 0);
+        }
+
+        function openImportModal() {
+            document.getElementById('import-textarea').value = '';
+            document.getElementById('import-file-input').value = '';
+            document.getElementById('import-modal').classList.add('active');
+            closeModal('settings-modal');
+        }
+
+        function importFromText() {
+            const text = document.getElementById('import-textarea').value.trim();
+            if (!text) return appAlert('متنی وارد نشده است.');
+            try {
+                const imported = JSON.parse(text);
+                if (imported && imported.slips !== undefined) {
+                    appData = imported;
+                    saveData();
+                    closeModal('import-modal');
+                    appAlert('اطلاعات با موفقیت بازیابی شد.');
+                    location.reload();
+                } else {
+                    appAlert("داده‌های نامعتبر. مطمئن شوید JSON صحیح است.");
+                }
+            } catch (err) {
+                appAlert("خطا در تجزیه JSON. لطفاً فرمت را بررسی کنید.");
+            }
+        }
+
+        function importFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+                    if (imported && imported.slips !== undefined) {
+                        appData = imported;
+                        saveData();
+                        closeModal('import-modal');
+                        appAlert('اطلاعات با موفقیت از فایل بازیابی شد.');
+                        location.reload();
+                    } else {
+                        appAlert("فایل نامعتبر است.");
+                    }
+                } catch (err) {
+                    appAlert("خطا در خواندن فایل.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // --- Core App Navigation ---
+        function startJourney() { appData.isStarted = true; const now = new Date().getTime();
+            appData.installDate = now;
+            appData.startDate = now;
+            saveData(); }
+
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            if (tabId === 'calendar') renderCalendar();
+            if (tabId === 'goals') renderGoals();
+            if (tabId === 'insights') { calculateStatsAndChart(); }
+        }
+
+        function updateAllSections() {
+            if (!appData.isStarted) {
+                document.getElementById('empty-state-view').style.display = 'block';
+                document.getElementById('active-state-view').style.display = 'none';
+                document.getElementById('bio-card').style.display = 'none';
+                document.getElementById('coach-wrapper').style.display = 'none';
+                document.getElementById('goals-content-wrapper').style.display = 'none';
+                document.getElementById('goals-empty-msg').style.display = 'block';
+                document.getElementById('best-record').innerText = '0 روز';
+                document.getElementById('current-status-text').innerText = '-';
+            } else {
+                document.getElementById('empty-state-view').style.display = 'none';
+                document.getElementById('active-state-view').style.display = 'block';
+                document.getElementById('bio-card').style.display = 'block';
+                document.getElementById('coach-wrapper').style.display = 'block';
+                document.getElementById('goals-content-wrapper').style.display = 'block';
+                document.getElementById('goals-empty-msg').style.display = 'none';
+                updateTimer();
+            }
+            calculateStatsAndChart();
+            if (document.getElementById('goals').classList.contains('active')) renderGoals();
+            if (document.getElementById('calendar').classList.contains('active')) renderCalendar();
+        }
+
+        function toggleHelp() {
+            const content = document.getElementById('help-content');
+            const icon = document.getElementById('help-chevron');
+            if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+                content.style.maxHeight = '0px';
+                icon.classList.remove('help-icon-rotate');
+            } else {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                icon.classList.add('help-icon-rotate');
+            }
+        }
+
+        // --- Slip Management & Tags ---
+        function recalculateStartDate() {
+            if (appData.slips.length > 0) appData.startDate = appData.slips[appData.slips.length - 1].date;
+            else appData.startDate = appData.installDate;
+        }
+
+        function processSlip(timestamp, tagsArray) {
+            appData.slips.push({ date: timestamp, tags: tagsArray });
+            appData.slips.sort((a, b) => a.date - b.date);
+            recalculateStartDate();
+            saveData();
+        }
+
+        window.undoLastSlip = function() {
+            if (appData.slips.length === 0) return appAlert("هیچ لغزشی ثبت نشده است.");
+            appConfirm("از بازگردانی آخرین لغزش خود اطمینان دارید؟ تایمر به حالت قبل برمی‌گردد.", () => {
+                appData.slips.pop();
+                recalculateStartDate();
+                saveData();
+            });
+        }
+
+        window.toggleTag = function(element) { element.classList.toggle('active'); }
+
+        function getSelectedTags(containerId) {
+            const container = document.getElementById(containerId);
+            const activeBtns = container.querySelectorAll('.tag-btn.active');
+            return Array.from(activeBtns).map(btn => btn.getAttribute('data-tag'));
+        }
+
+        function resetTags(containerId, activeTagsArray) {
+            const container = document.getElementById(containerId);
+            const btns = container.querySelectorAll('.tag-btn');
+            btns.forEach(btn => {
+                if (activeTagsArray.includes(btn.getAttribute('data-tag'))) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        function openInstantResetModal() {
+            resetTags('instant-tags', []);
+            document.getElementById('instant-reset-modal').classList.add('active');
+        }
+
+        function confirmInstantReset() {
+            const tags = getSelectedTags('instant-tags');
+            processSlip(new Date().getTime(), tags);
+            closeModal('instant-reset-modal');
+        }
+
+        window.adjustTime = function(type, amount) {
+            if (type === 'h') {
+                customTimeH += amount;
+                if (customTimeH > 23) customTimeH = 0;
+                if (customTimeH < 0) customTimeH = 23;
+                document.getElementById('custom-h-disp').innerText = customTimeH.toString().padStart(2, '0');
+            } else {
+                customTimeM += amount;
+                if (customTimeM > 59) customTimeM = 0;
+                if (customTimeM < 0) customTimeM = 59;
+                document.getElementById('custom-m-disp').innerText = customTimeM.toString().padStart(2, '0');
+            }
+        }
+
+        window.openDateSpecificModal = function(gy, gm, gd, jy, jm, jd, monthName) {
+            selectedGregorianForSlip = { y: gy, m: gm, d: gd };
+            const faNum = new Intl.NumberFormat('fa-IR').format(jd);
+            document.getElementById('selected-date-text').innerText = `${faNum} ${monthName} ${jy}`;
+
+            const targetTime = new Date(gy, gm - 1, gd).setHours(0, 0, 0, 0);
+            const existingSlip = appData.slips.find(slip => new Date(slip.date).setHours(0, 0, 0, 0) === targetTime);
+            const now = new Date();
+
+            if (existingSlip) {
+                const d = new Date(existingSlip.date);
+                customTimeH = d.getHours();
+                customTimeM = d.getMinutes();
+                resetTags('specific-tags', existingSlip.tags || []);
+                document.getElementById('btn-save-slip').innerHTML =
+                '<i class="fa-solid fa-check"></i> ویرایش زمان/علت لغزش';
+                document.getElementById('btn-delete-slip').style.display = "block";
+            } else {
+                customTimeH = now.getHours();
+                customTimeM = now.getMinutes();
+                resetTags('specific-tags', []);
+                document.getElementById('btn-save-slip').innerHTML =
+                '<i class="fa-solid fa-check"></i> ذخیره لغزش جدید';
+                document.getElementById('btn-delete-slip').style.display = "none";
+            }
+
+            document.getElementById('custom-h-disp').innerText = customTimeH.toString().padStart(2, '0');
+            document.getElementById('custom-m-disp').innerText = customTimeM.toString().padStart(2, '0');
+
+            const hasWd = appData.wetDreams.includes(targetTime);
+            const wdContainer = document.getElementById('wd-toggle-container');
+            const wdCheckIcon = document.getElementById('wd-check-icon');
+            const wdText = document.getElementById('wd-toggle-text');
+
+            if (hasWd) {
+                wdContainer.classList.add('active');
+                wdCheckIcon.className = 'fa-solid fa-circle-check wd-check-icon';
+                wdText.innerText = 'احتلام در این روز ثبت شده است';
+            } else {
+                wdContainer.classList.remove('active');
+                wdCheckIcon.className = 'fa-regular fa-circle wd-check-icon';
+                wdText.innerText = 'احتلام در این روز ثبت شود';
+            }
+
+            document.getElementById('date-specific-modal').classList.add('active');
+        };
+
+        window.toggleWetDream = function() {
+            const targetTime = new Date(selectedGregorianForSlip.y, selectedGregorianForSlip.m - 1, selectedGregorianForSlip
+                .d).setHours(0, 0, 0, 0);
+            const index = appData.wetDreams.indexOf(targetTime);
+            const wdContainer = document.getElementById('wd-toggle-container');
+            const wdCheckIcon = document.getElementById('wd-check-icon');
+            const wdText = document.getElementById('wd-toggle-text');
+
+            if (index > -1) {
+                appData.wetDreams.splice(index, 1);
+                wdContainer.classList.remove('active');
+                wdCheckIcon.className = 'fa-regular fa-circle wd-check-icon';
+                wdText.innerText = 'احتلام در این روز ثبت شود';
+            } else {
+                appData.wetDreams.push(targetTime);
+                appData.wetDreams.sort((a, b) => a - b);
+                wdContainer.classList.add('active');
+                wdCheckIcon.className = 'fa-solid fa-circle-check wd-check-icon';
+                wdText.innerText = 'احتلام در این روز ثبت شده است';
+            }
+            saveData();
+        }
+
+        window.confirmDateSpecificReset = function() {
+            const tags = getSelectedTags('specific-tags');
+            const slipTimestamp = new Date(selectedGregorianForSlip.y, selectedGregorianForSlip.m - 1,
+                selectedGregorianForSlip.d, customTimeH, customTimeM, 0, 0).getTime();
+
+            if (slipTimestamp > new Date().getTime()) return appAlert("زمان آینده قابل ثبت نیست!");
+
+            const targetTime = new Date(selectedGregorianForSlip.y, selectedGregorianForSlip.m - 1, selectedGregorianForSlip
+                .d).setHours(0, 0, 0, 0);
+            appData.slips = appData.slips.filter(slip => new Date(slip.date).setHours(0, 0, 0, 0) !== targetTime);
+
+            processSlip(slipTimestamp, tags);
+            closeModal('date-specific-modal');
+        }
+
+        window.deleteDateSpecificReset = function() {
+            appConfirm("آیا از حذف لغزش این روز مطمئن هستید؟", () => {
+                const targetTime = new Date(selectedGregorianForSlip.y, selectedGregorianForSlip.m - 1,
+                    selectedGregorianForSlip.d).setHours(0, 0, 0, 0);
+                appData.slips = appData.slips.filter(slip => new Date(slip.date).setHours(0, 0, 0, 0) !==
+                    targetTime);
+                recalculateStartDate();
+                saveData();
+                closeModal('date-specific-modal');
+            });
+        }
+
+        // --- Breathing Panic Mode ---
+        let breatheInterval, breatheTimeout1, breatheTimeout2;
+
+        function openPanicModal() {
+            document.getElementById('panic-modal').classList.add('active');
+            document.getElementById('breathe-circle').classList.remove('active');
+            document.getElementById('breathe-text').innerText = "آماده...";
+            document.getElementById('breathe-desc').innerText = "برای شروع دکمه را بزنید";
+            document.getElementById('btn-start-breathe').style.display = 'block';
+        }
+
+        window.startBreathing = function() {
+            document.getElementById('btn-start-breathe').style.display = 'none';
+            document.getElementById('breathe-circle').classList.add('active');
+            runBreatheCycle();
+            breatheInterval = setInterval(runBreatheCycle, 19000);
+        }
+
+        function runBreatheCycle() {
+            document.getElementById('breathe-text').innerText = "دم...";
+            document.getElementById('breathe-desc').innerText = "از بینی نفس بکش (۴ ثانیه)";
+            breatheTimeout1 = setTimeout(() => {
+                document.getElementById('breathe-text').innerText = "نگه‌دار...";
+                document.getElementById('breathe-desc').innerText = "نفس را حبس کن (۷ ثانیه)";
+                breatheTimeout2 = setTimeout(() => {
+                    document.getElementById('breathe-text').innerText = "بازدم...";
+                    document.getElementById('breathe-desc').innerText = "از دهان خارج کن (۸ ثانیه)";
+                }, 7000);
+            }, 4000);
+        }
+
+        window.closePanicModal = function() {
+            clearInterval(breatheInterval);
+            clearTimeout(breatheTimeout1);
+            clearTimeout(breatheTimeout2);
+            document.getElementById('breathe-circle').classList.remove('active');
+            closeModal('panic-modal');
+        }
+
+        // --- Biology & Coach ---
+        function updateBiologyTimeline(days, hours) {
+            const msgEl = document.getElementById('bio-message');
+            let daysSinceWD = -1;
+            if (appData.wetDreams && appData.wetDreams.length > 0) {
+                const latestWD = Math.max(...appData.wetDreams);
+                if (latestWD > appData.startDate) daysSinceWD = Math.floor((new Date().getTime() - latestWD) / (1000 * 60 *
+                    60 * 24));
+            }
+
+            if (days > 0 && (daysSinceWD === 0 || daysSinceWD === 1)) {
+                msgEl.innerHTML =
+                    "<b>واکنش طبیعی بدن (پس از احتلام):</b> تخلیه طبیعی نشان‌دهنده سلامت سیستم تولید مثل است. ممکن است افت موقت انرژی داشته باشید، اما ترمیم گیرنده‌های عصبی شما بدون وقفه ادامه دارد.";
+                return;
+            }
+
+            if (days === 0 && hours < 24) msgEl.innerHTML =
+                "<b>ساعات اولیه:</b> کاهش پرولاکتین و شروع بازگشت ضربان قلب به حالت عادی. بدن متوجه تغییر شده است.";
+            else if (days >= 1 && days < 3) msgEl.innerHTML =
+                "<b>سم‌زدایی (۱ تا ۳ روز):</b> آغاز بازسازی گیرنده‌ها. احساس خستگی، مه فکری و تغییرات خلقی طبیعی است.";
+            else if (days >= 3 && days < 7) msgEl.innerHTML =
+                "<b>جهش تستوسترون (۳ تا ۷ روز):</b> سطح تستوسترون شروع به افزایش می‌کند تا در روز هفتم به اوج برسد. افزایش محسوس انرژی فیزیکی.";
+            else if (days >= 7 && days < 14) msgEl.innerHTML =
+                "<b>تثبیت (هفته دوم):</b> بازگشت تستوسترون به سطح پایدار. گیرنده‌های آندروژن حساس‌تر می‌شوند. کیفیت خواب بهبود می‌یابد.";
+            else if (days >= 14 && days < 30) msgEl.innerHTML =
+                "<b>ترمیم عصبی (۱۴ تا ۳۰ روز):</b> کاهش اضطراب. قشر پیش‌پیشانی مغز (مرکز اراده و منطق) شروع به ترمیم می‌کند.";
+            else if (days >= 30 && days < 90) msgEl.innerHTML =
+                "<b>بازگشت حساسیت (۱ تا ۳ ماه):</b> مسیرهای پاداش مغز به حالت طبیعی برمی‌گردند. لذت‌های طبیعی زندگی برمی‌گردد.";
+            else if (days >= 90) msgEl.innerHTML =
+                "<b>راه‌اندازی مجدد (Reboot):</b> سیستم دوپامینرژیک کاملاً شفا یافته است. مغز شما حالا ساختار یک انسان آزاد را دارد.";
+        }
+
+        function updateStatusLogo(currentDays) {
+            const textEl = document.getElementById('current-status-text');
+            const iconEl = document.getElementById('current-status-icon');
+            if (currentDays === 0) { textEl.innerText = "شروع مجدد";
+                iconEl.className = "fa-solid fa-person-walking-arrow-right status-icon-animated";
+                iconEl.style.color = "var(--accent-blue)"; } else if (currentDays < 7) { textEl.innerText = "در مسیر پاکی";
+                iconEl.className = "fa-solid fa-fire status-icon-animated";
+                iconEl.style.color = "#ff9500"; } else if (currentDays < 21) { textEl.innerText = "تثبیت قدرت";
+                iconEl.className = "fa-solid fa-bolt";
+                iconEl.style.color = "#ffd700"; } else { textEl.innerText = "اراده پولادین";
+                iconEl.className = "fa-solid fa-shield-halved";
+                iconEl.style.color = "var(--accent-green)"; }
+        }
+
+        function updateSmartCoach(currentDays) {
+            const msgEl = document.getElementById('coach-message');
+            if (appData.slips.length === 0 && (!appData.wetDreams || appData.wetDreams.length === 0)) {
+                msgEl.innerHTML = "شما با قدرت شروع کرده‌اید. ثبات قدم مهم‌ترین رمز موفقیت است. ادامه دهید!";
+                return;
+            }
+
+            if (currentDays === 0) {
+                msgEl.innerHTML =
+                    "<b>هشدار (Chaser Effect)</b><br>میل به تکرار لغزش در ۲۴ ساعت اول به‌شدت بالاست. از اتاق خارج شو و خودت را سرگرم کن.";
+                return;
+            }
+
+            let daysSinceWD = -1;
+            if (appData.wetDreams && appData.wetDreams.length > 0) {
+                const latestWD = Math.max(...appData.wetDreams);
+                if (latestWD > appData.startDate) daysSinceWD = Math.floor((new Date().getTime() - latestWD) / (1000 * 60 *
+                    60 * 24));
+            }
+
+            if (daysSinceWD === 0) {
+                msgEl.innerHTML =
+                    "<b>احتلام طبیعی دیشب:</b> این یک اتفاق بیولوژیک و نشانه پاکسازی بدن است. رکورد شما پابرجاست! اما امروز مراقب اثر تعقیب‌کننده و بهانه‌های ناگهانی مغز باشید.";
+                return;
+            } else if (daysSinceWD === 1) {
+                msgEl.innerHTML =
+                    "<b>تثبیت پس از احتلام:</b> امروز ممکن است کمی احساس خستگی یا وسوسه خفیف داشته باشید. دوش آب سرد و ورزش به شدت کمک‌کننده است.";
+                return;
+            }
+
+            if (currentDays === 1 || currentDays === 2) msgEl.innerHTML =
+                "روزهای اول سخت‌ترین‌ها هستند. ذهن در حال تقلا برای دوپامین کاذب است. مقاومت کن.";
+            else if (currentDays >= 14 && currentDays <= 21) msgEl.innerHTML =
+                "ممکن است پدیده Flatline (بی‌انگیزگی موقت) را تجربه کنید. این نشانه خوبِ ترمیم ذهن است.";
+            else msgEl.innerHTML =
+                `شما <b>${currentDays} روز</b> است که در مسیر هستید. به ساختن این زنجیره ادامه بده.`;
+        }
+
+        function updateTimer() {
+            if (!appData.isStarted) return;
+            const now = new Date().getTime();
+            const diff = Math.max(0, now - appData.startDate);
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('val-days').innerText = days;
+            document.getElementById('val-hours').innerText = hours.toString().padStart(2, '0');
+            document.getElementById('val-mins').innerText = mins.toString().padStart(2, '0');
+            document.getElementById('val-secs').innerText = secs.toString().padStart(2, '0');
+
+            updateStatusLogo(days);
+            updateSmartCoach(days);
+            updateBiologyTimeline(days, hours);
+        }
+        setInterval(updateTimer, 1000);
+
+        // --- Chart Slide Management ---
+        function initChartSwipe() {
+            const wrapper = document.getElementById('chart-slider-wrapper');
+            if (!wrapper) return;
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            wrapper.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+            wrapper.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                const diff = touchStartX - touchEndX;
+                if (Math.abs(diff) > 40) {
+                    if (diff > 0 && currentChartSlide === 1) switchChartSlideTo(0);
+                    else if (diff < 0 && currentChartSlide === 0) switchChartSlideTo(1);
+                }
+            }, { passive: true });
+
+            let mouseDownX = 0;
+            wrapper.addEventListener('mousedown', (e) => { mouseDownX = e.screenX; });
+            wrapper.addEventListener('mouseup', (e) => {
+                const diff = mouseDownX - e.screenX;
+                if (Math.abs(diff) > 40) {
+                    if (diff > 0 && currentChartSlide === 1) switchChartSlideTo(0);
+                    else if (diff < 0 && currentChartSlide === 0) switchChartSlideTo(1);
+                }
+            });
+        }
+
+        function switchChartSlideTo(index) {
+            currentChartSlide = index;
+            const inner = document.getElementById('chart-slider-inner');
+            if (inner) inner.style.transform = `translateX(${index * 50}%)`;
+            const dots = document.querySelectorAll('#chart-dots .chart-dot');
+            dots.forEach((d, i) => { d.classList.toggle('active', i === index); });
+        }
+
+        // --- Advanced Stats, Insights & Chart ---
+        let streakData = [];
+        let streakLabels = [];
+
+        window.calculateStatsAndChart = function() {
+            if (!appData.isStarted) return;
+
+            const MS_PER_DAY = 1000 * 60 * 60 * 24;
+            const now = new Date().getTime();
+
+            let firstSlipDate = (appData.slips && appData.slips.length > 0) ? appData.slips[0].date : appData.installDate;
+            let baseTrackingTime = firstSlipDate;
+
+            let timeframeVal = document.getElementById('stat-timeframe');
+            timeframeVal = timeframeVal ? timeframeVal.value : 'all';
+
+            let limitTime = baseTrackingTime;
+            if (timeframeVal !== 'all') {
+                const days = parseInt(timeframeVal);
+                limitTime = now - (days * MS_PER_DAY);
+                if (limitTime < baseTrackingTime) limitTime = baseTrackingTime;
+            }
+
+            let windowSlips = appData.slips.filter(s => s.date >= limitTime && s.date <= now);
+            let windowWds = appData.wetDreams.filter(d => d >= limitTime && d <= now);
+
+            let slipBeforeWindow = appData.slips.slice().reverse().find(s => s.date < limitTime);
+            let trackingStartForWindow = slipBeforeWindow ? slipBeforeWindow.date : baseTrackingTime;
+
+            let intervals = [];
+            if (windowSlips.length === 0) {
+                let intervalDays = (now - trackingStartForWindow) / MS_PER_DAY;
+                intervals.push(Math.max(0, intervalDays));
+            } else {
+                let lastEventDate = windowSlips[0].date;
+                for (let i = 1; i < windowSlips.length; i++) {
+                    let intervalDays = (windowSlips[i].date - lastEventDate) / MS_PER_DAY;
+                    intervals.push(Math.max(0, intervalDays));
+                    lastEventDate = windowSlips[i].date;
+                }
+                let currentOngoing = (now - lastEventDate) / MS_PER_DAY;
+                intervals.push(Math.max(0, currentOngoing));
+            }
+
+            let maxInterval = Math.max(...intervals);
+            let completedIntervals = windowSlips.length > 0 ? intervals.slice(0, -1) : [];
+            let minInterval = completedIntervals.length > 0 ? Math.min(...completedIntervals) : maxInterval;
+            let avgInterval = completedIntervals.length > 0 ? (completedIntervals.reduce((a, b) => a + b, 0) /
+                completedIntervals.length) : maxInterval;
+
+            let totalWindowDays = Math.max(1, (now - limitTime) / MS_PER_DAY);
+            let uniqueSlipDays = new Set(windowSlips.map(s => new Date(s.date).setHours(0, 0, 0, 0))).size;
+            let cleanDays = Math.max(0, totalWindowDays - uniqueSlipDays);
+            let successRate = Math.max(0, Math.min(100, (cleanDays / totalWindowDays) * 100));
+
+            document.getElementById('stat-total-slips').innerText = windowSlips.length;
+            document.getElementById('stat-max-streak').innerText = Math.floor(maxInterval);
+            document.getElementById('stat-min-streak').innerText = windowSlips.length > 0 ? Math.floor(minInterval) : '-';
+            document.getElementById('stat-avg-streak').innerText = avgInterval.toFixed(1);
+            document.getElementById('stat-success-rate').innerText = successRate.toFixed(1) + '٪';
+            document.getElementById('stat-total-wd').innerText = windowWds.length;
+
+            streakData = intervals;
+            streakLabels = intervals.map((_, i) => i === intervals.length - 1 ? 'فعلی' : `دوره ${i + 1}`);
+
+            renderAllCharts();
+            renderHeatmap(windowSlips);
+
+            let allTimeIntervals = [];
+            if (appData.slips.length === 0) {
+                allTimeIntervals.push((now - baseTrackingTime) / MS_PER_DAY);
+            } else {
+                let lastAllTime = appData.slips[0].date;
+                for (let i = 1; i < appData.slips.length; i++) {
+                    allTimeIntervals.push((appData.slips[i].date - lastAllTime) / MS_PER_DAY);
+                    lastAllTime = appData.slips[i].date;
+                }
+                allTimeIntervals.push((now - lastAllTime) / MS_PER_DAY);
+            }
+            let bestRecordDays = Math.floor(Math.max(...allTimeIntervals, 0));
+            let bestRecordEl = document.getElementById('best-record');
+            if (bestRecordEl) bestRecordEl.innerText = `${bestRecordDays} روز`;
+
+            const triggerEl = document.getElementById('insight-trigger');
+            const slipsWithTags = windowSlips.filter(s => s.tags && s.tags.length > 0);
+            if (windowSlips.length === 0 || slipsWithTags.length === 0) {
+                triggerEl.innerHTML =
+                `<span class="data-warning">داده‌های فعلی در این بازه برای تحلیل ریشه‌یابی کافی نیست.</span>`;
+            } else {
+                let tagCounts = {};
+                let totalTags = 0;
+                slipsWithTags.forEach(s => { s.tags.forEach(t => { tagCounts[t] = (tagCounts[t] || 0) + 1;
+                        totalTags++; }); });
+                const sortedTags = Object.keys(tagCounts).sort((a, b) => tagCounts[b] - tagCounts[a]).slice(0, 3);
+                let htmlStr =
+                    `<p style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">بیشترین دلایل شکست‌های شما به ترتیب:</p>`;
+                sortedTags.forEach(t => {
+                    let p = Math.round((tagCounts[t] / totalTags) * 100);
+                    htmlStr +=
+                        `<div class="tag-stat-row"><span>${tagNames[t] || t}</span><span>${p}٪</span></div>
+                    <div class="tag-stat-bar-bg"><div class="tag-stat-bar-fill" style="width:${p}%;"></div></div>`;
+                });
+                triggerEl.innerHTML = htmlStr;
+            }
+
+            const chaserEl = document.getElementById('insight-chaser');
+            let chaserCount = 0;
+            let applicableSlips = 0;
+            for (let i = 1; i < appData.slips.length; i++) {
+                if (appData.slips[i].date >= limitTime) {
+                    applicableSlips++;
+                    if ((appData.slips[i].date - appData.slips[i - 1].date) <= (48 * 60 * 60 * 1000)) chaserCount++;
+                }
+            }
+            if (applicableSlips === 0) {
+                chaserEl.innerHTML =
+                `<span class="data-warning">داده‌ای در این بازه برای بررسی اثر تعقیب‌کننده وجود ندارد.</span>`;
+            } else {
+                let chaserPercent = Math.round((chaserCount / applicableSlips) * 100);
+                chaserEl.innerHTML =
+                    `در <b>${chaserPercent}٪</b> مواقع، پس از یک شکست، در کمتر از ۴۸ ساعت دوباره لغزش داشته‌اید.<br><span style="font-size: 11px; opacity:0.8; display:inline-block; margin-top:5px; color: ${chaserPercent > 40 ? 'var(--accent-red)' : 'var(--accent-green)'};">${chaserPercent > 40 ? '⚠️ مراقب این تله خطرناک باشید.' : '✅ شما در کنترل خود پس از شکست موفق بوده‌اید.'}</span>`;
+            }
+
+            const timeOfDayEl = document.getElementById('insight-timeofday');
+            if (windowSlips.length === 0) {
+                timeOfDayEl.innerHTML = `<span class="data-warning">داده‌ای در این بازه ثبت نشده است.</span>`;
+            } else {
+                let times = { 'بامداد (۰۰ تا ۶)': 0, 'صبح (۶ تا ۱۲)': 0, 'عصر (۱۲ تا ۱۸)': 0, 'شب (۱۸ تا ۰۰)': 0 };
+                windowSlips.forEach(s => {
+                    let h = new Date(s.date).getHours();
+                    if (h >= 0 && h < 6) times['بامداد (۰۰ تا ۶)']++;
+                    else if (h >= 6 && h < 12) times['صبح (۶ تا ۱۲)']++;
+                    else if (h >= 12 && h < 18) times['عصر (۱۲ تا ۱۸)']++;
+                    else times['شب (۱۸ تا ۰۰)']++;
+                });
+                let maxTime = Object.keys(times).reduce((a, b) => times[a] > times[b] ? a : b);
+                timeOfDayEl.innerHTML =
+                    `بیشترین آسیب‌پذیری شما در زمان <b>${maxTime}</b> با ${times[maxTime]} خطا ثبت شده است. سپر دفاعی خود را در این زمان قوی کنید.`;
+            }
+
+            const wdWrapper = document.getElementById('insight-wd-wrapper');
+            const wdEl = document.getElementById('insight-wd');
+            if (windowWds && windowWds.length > 0) {
+                wdWrapper.style.display = 'flex';
+                if (windowWds.length < 2) {
+                    wdEl.innerHTML = `در این بازه زمانی <b>۱ بار</b> احتلام ثبت کرده‌اید. این فرآیند کاملا طبیعی است.`;
+                } else {
+                    const firstWD = windowWds[0];
+                    const lastWD = windowWds[windowWds.length - 1];
+                    const avgWDDays = ((lastWD - firstWD) / (windowWds.length - 1) / MS_PER_DAY).toFixed(1);
+                    wdEl.innerHTML =
+                        `در این بازه <b>${windowWds.length} بار</b> ثبت شده. میانگین فاصله طبیعی حدود <b>${avgWDDays} روز</b> است.`;
+                }
+            } else { wdWrapper.style.display = 'none'; }
+        }
+
+        function renderAllCharts() {
+            const warning = document.getElementById('chart-warning');
+            const sliderWrapper = document.getElementById('chart-slider-wrapper');
+            const dotsContainer = document.getElementById('chart-dots');
+
+            if (streakData.length < 2) {
+                if (sliderWrapper) sliderWrapper.style.display = 'none';
+                if (dotsContainer) dotsContainer.style.display = 'none';
+                if (warning) warning.style.display = 'inline-block';
+                if (chartInstanceBar) { chartInstanceBar.destroy();
+                    chartInstanceBar = null; }
+                if (chartInstanceLine) { chartInstanceLine.destroy();
+                    chartInstanceLine = null; }
+                return;
+            } else {
+                if (sliderWrapper) sliderWrapper.style.display = 'block';
+                if (dotsContainer) dotsContainer.style.display = 'flex';
+                if (warning) warning.style.display = 'none';
+            }
+
+            const isLight = appData.theme === 'light';
+            const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+            const tickColor = isLight ? '#666' : '#8a8d91';
+
+            const bgColors = streakData.map((_, i) => i === streakData.length - 1 ? 'rgba(42, 101, 240, 0.8)' :
+                'rgba(52, 199, 89, 0.8)');
+            const borderColors = streakData.map((_, i) => i === streakData.length - 1 ? '#2a65f0' : '#34c759');
+
+            const ctxBar = document.getElementById('progressChartBar');
+            if (ctxBar) {
+                if (chartInstanceBar) chartInstanceBar.destroy();
+                chartInstanceBar = new Chart(ctxBar.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: streakLabels,
+                        datasets: [{
+                            label: 'طول دوره (روز)',
+                            data: streakData.map(d => d.toFixed(1)),
+                            backgroundColor: bgColors,
+                            borderColor: borderColors,
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: gridColor },
+                                ticks: { color: tickColor } },
+                            x: { grid: { display: false }, ticks: { color: tickColor, font: { family: 'Vazirmatn' } } }
+                        }
+                    }
+                });
+            }
+
+            const ctxLine = document.getElementById('progressChartLine');
+            if (ctxLine) {
+                if (chartInstanceLine) chartInstanceLine.destroy();
+                const lineColor = isLight ? '#1a1a1a' : '#e0e0e0';
+                const dotColor = isLight ? '#2a65f0' : '#4b8af3';
+                chartInstanceLine = new Chart(ctxLine.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: streakLabels,
+                        datasets: [{
+                            label: 'طول دوره (روز)',
+                            data: streakData.map(d => d.toFixed(1)),
+                            borderColor: lineColor,
+                            backgroundColor: 'transparent',
+                            pointBackgroundColor: dotColor,
+                            pointBorderColor: dotColor,
+                            pointRadius: 6,
+                            pointHoverRadius: 9,
+                            borderWidth: 2.5,
+                            tension: 0.3,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { beginAtZero: true, grid: { color: gridColor },
+                                ticks: { color: tickColor } },
+                            x: { grid: { display: false }, ticks: { color: tickColor, font: { family: 'Vazirmatn' } } }
+                        }
+                    }
+                });
+            }
+
+            switchChartSlideTo(currentChartSlide);
+        }
+
+        function renderHeatmap(windowSlips) {
+            const ctx = document.getElementById('heatmapChart');
+            const peakTextEl = document.getElementById('heatmap-peak-text');
+            if (!ctx) return;
+            if (chartInstanceHeatmap) chartInstanceHeatmap.destroy();
+
+            const hourCounts = new Array(24).fill(0);
+            windowSlips.forEach(s => {
+                const h = new Date(s.date).getHours();
+                hourCounts[h]++;
+            });
+
+            const maxCount = Math.max(...hourCounts, 1);
+            const isLight = appData.theme === 'light';
+            const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
+            const tickColor = isLight ? '#666' : '#8a8d91';
+
+            const bgColors = hourCounts.map(c => {
+                if (c === 0) return isLight ? 'rgba(255,200,200,0.25)' : 'rgba(255,100,100,0.1)';
+                const ratio = c / maxCount;
+                const r = Math.round(180 + 75 * ratio);
+                const g = Math.round(50 - 30 * ratio);
+                const b = Math.round(50 - 30 * ratio);
+                return `rgba(${r},${g},${b},${0.3 + 0.7 * ratio})`;
+            });
+            const borderColors = hourCounts.map(c => {
+                if (c === maxCount && c > 0) return '#8b0000';
+                return isLight ? 'rgba(200,150,150,0.5)' : 'rgba(255,150,150,0.3)';
+            });
+
+            const persianHours = hourCounts.map((_, i) => new Intl.NumberFormat('fa-IR').format(i));
+
+            chartInstanceHeatmap = new Chart(ctx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: persianHours,
+                    datasets: [{
+                        label: 'تعداد لغزش',
+                        data: hourCounts,
+                        backgroundColor: bgColors,
+                        borderColor: borderColors,
+                        borderWidth: 1,
+                        borderRadius: 4,
+                        barPercentage: 0.9
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: gridColor },
+                            ticks: { color: tickColor, stepSize: 1 } },
+                        x: { grid: { display: false }, ticks: { color: tickColor, font: { family: 'Vazirmatn',
+                                    size: 10 } }, title: { display: true, text: 'ساعت شبانه‌روز',
+                                color: tickColor, font: { family: 'Vazirmatn', size: 11 } } }
+                    }
+                }
+            });
+
+            if (maxCount === 0) {
+                peakTextEl.innerHTML = 'در بازه انتخاب‌شده هیچ لغزشی ثبت نشده است.';
+            } else {
+                const peakHours = [];
+                hourCounts.forEach((c, i) => { if (c === maxCount) peakHours.push(i); });
+                const peakStr = peakHours.map(h => new Intl.NumberFormat('fa-IR').format(h)).join(' و ');
+                peakTextEl.innerHTML =
+                    `🕐 بیشترین لغزش در ساعت <b>${peakStr}</b> (${maxCount} مورد). این بازه زمانی نیاز به مراقبت ویژه دارد.`;
+            }
+        }
+
+        function exportChartAsPNG() {
+            if (streakData.length < 2) return appAlert('داده‌های کافی برای خروجی نمودار وجود ندارد.');
+
+            const exportCanvas = document.createElement('canvas');
+            exportCanvas.width = 900;
+            exportCanvas.height = 600;
+            const ctx = exportCanvas.getContext('2d');
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+            ctx.fillStyle = '#1a1a1a';
+            ctx.font = 'bold 20px Vazirmatn, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.direction = 'rtl';
+            ctx.fillText('نمودار روند پاکی – تحلیل طول دوره‌های بین لغزش', exportCanvas.width / 2, 45);
+
+            ctx.font = '13px Vazirmatn, sans-serif';
+            ctx.fillStyle = '#555';
+            ctx.fillText('این نمودار تعداد روزهای پاکی بین لغزش‌های متوالی را نشان می‌دهد. روند صعودی نشانه پیشرفت است.', exportCanvas.width / 2, 70);
+
+            const margin = { top: 90, right: 80, bottom: 90, left: 70 };
+            const chartW = exportCanvas.width - margin.left - margin.right;
+            const chartH = exportCanvas.height - margin.top - margin.bottom;
+
+            const maxVal = Math.max(...streakData, 1);
+            const ySteps = 5;
+            const yStepVal = Math.ceil(maxVal / ySteps);
+            const yMax = ySteps * yStepVal;
+
+            ctx.strokeStyle = '#cccccc';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i <= ySteps; i++) {
+                const y = margin.top + chartH - (i / ySteps) * chartH;
+                ctx.beginPath();
+                ctx.moveTo(margin.left, y);
+                ctx.lineTo(margin.left + chartW, y);
+                ctx.stroke();
+
+                ctx.fillStyle = '#333';
+                ctx.font = 'bold 13px Vazirmatn, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.direction = 'ltr';
+                const val = Math.round(i * yStepVal);
+                ctx.fillText(`${val} روز`, margin.left - 15, y + 5);
+            }
+
+            ctx.save();
+            ctx.translate(20, margin.top + chartH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 14px Vazirmatn, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('مدت پاکی (روز)', 0, 0);
+            ctx.restore();
+
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top);
+            ctx.lineTo(margin.left, margin.top + chartH);
+            ctx.lineTo(margin.left + chartW, margin.top + chartH);
+            ctx.stroke();
+
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 12px Vazirmatn, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.direction = 'rtl';
+            const xStep = chartW / (streakData.length - 1 || 1);
+            streakLabels.forEach((label, i) => {
+                const x = margin.left + i * xStep;
+                ctx.fillText(label, x, margin.top + chartH + 25);
+            });
+
+            ctx.fillText('دوره‌های پاکی (متوالی)', margin.left + chartW / 2, margin.top + chartH + 55);
+
+            const points = streakData.map((d, i) => ({
+                x: margin.left + i * xStep,
+                y: margin.top + chartH - (d / yMax) * chartH,
+                val: d
+            }));
+
+            ctx.strokeStyle = '#1a1a1a';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            points.forEach((p, i) => { if (i === 0) ctx.moveTo(p.x, p.y);
+                else ctx.lineTo(p.x, p.y); });
+            ctx.stroke();
+
+            points.forEach((p, i) => {
+                ctx.fillStyle = i === points.length - 1 ? '#2a65f0' : '#34c759';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#ffffff';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = '#1a1a1a';
+                ctx.font = 'bold 12px Vazirmatn, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.direction = 'ltr';
+                const valText = p.val.toFixed(1);
+                ctx.fillText(valText, p.x, p.y - 18);
+
+                if (i > 0) {
+                    const prevVal = points[i - 1].val;
+                    const growth = prevVal !== 0 ? ((p.val - prevVal) / prevVal) * 100 : 0;
+                    const growthText = growth >= 0 ? `+${growth.toFixed(0)}%` : `${growth.toFixed(0)}%`;
+                    ctx.fillStyle = growth >= 0 ? '#2e7d32' : '#c62828';
+                    ctx.font = '11px Vazirmatn, sans-serif';
+                    ctx.fillText(growthText, p.x, p.y - 34);
+                }
+
+                if (i === points.length - 1) {
+                    ctx.fillStyle = '#2a65f0';
+                    ctx.font = 'bold 13px Vazirmatn, sans-serif';
+                    ctx.fillText('(دوره جاری)', p.x, p.y - 50);
+                }
+            });
+
+            exportCanvas.toBlob(function(blob) {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'نمودار_پیشرفت_پاکی.png';
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => { document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url); }, 0);
+            }, 'image/png');
+        }
+
+        // --- Goals Logic ---
+        window.addCustomGoal = function() {
+            const daysInput = document.getElementById('custom-goal-days');
+            const days = parseInt(daysInput.value);
+            if (isNaN(days) || days <= 0) return appAlert('لطفاً یک عدد معتبر بزرگتر از صفر وارد کنید.');
+            if (appData.customGoals.some(g => g.days === days)) return appAlert('این هدف قبلاً اضافه شده است.');
+
+            const newGoal = {
+                id: 'cg_' + new Date().getTime(),
+                days: days,
+                title: `هدف ${days} روزه من`,
+                icon: 'fa-flag-checkered',
+                color: 'var(--accent-blue)'
+            };
+            appData.customGoals.push(newGoal);
+            saveData();
+            daysInput.value = '';
+            appAlert('هدف شخصی شما با موفقیت اضافه شد!');
+        };
+
+        window.deleteCustomGoal = function(id) {
+            appConfirm('آیا از حذف این هدف شخصی مطمئن هستید؟', () => {
+                appData.customGoals = appData.customGoals.filter(g => g.id !== id);
+                saveData();
+            });
+        };
+
+        function renderGoals() {
+            if (!appData.isStarted) return;
+            const customContainer = document.getElementById('custom-badges-container');
+            const customWrapper = document.getElementById('custom-goals-wrapper');
+            const predefContainer = document.getElementById('badges-container');
+            predefContainer.innerHTML = '';
+            customContainer.innerHTML = '';
+
+            if (appData.customGoals && appData.customGoals.length > 0) {
+                customWrapper.style.display = 'block';
+                [...appData.customGoals].sort((a, b) => a.days - b.days).forEach(goal => { customContainer.innerHTML +=
+                        generateBadgeHTML(goal, true); });
+            } else { customWrapper.style.display = 'none'; }
+            predefinedGoals.forEach(goal => { predefContainer.innerHTML += generateBadgeHTML(goal, false); });
+        }
+
+        function getGoalStats(goalDays) {
+            const MS_PER_DAY = 1000 * 60 * 60 * 24;
+            let allTimeIntervals = [];
+            let lastEvent;
+
+            if (appData.slips.length === 0) {
+                lastEvent = appData.installDate;
+            } else {
+                lastEvent = appData.slips[0].date;
+                for (let i = 1; i < appData.slips.length; i++) {
+                    allTimeIntervals.push((appData.slips[i].date - lastEvent) / MS_PER_DAY);
+                    lastEvent = appData.slips[i].date;
+                }
+            }
+            allTimeIntervals.push((new Date().getTime() - lastEvent) / MS_PER_DAY);
+
+            let earnedCount = 0;
+            for (let i = 0; i < allTimeIntervals.length - 1; i++) { if (allTimeIntervals[i] >= goalDays) earnedCount++; }
+            let currentStreakDays = allTimeIntervals.length > 0 ? allTimeIntervals[allTimeIntervals.length - 1] : 0;
+            let isActive = currentStreakDays >= goalDays;
+            if (isActive) earnedCount++;
+            return { count: earnedCount, isActive, currentProgress: currentStreakDays };
+        }
+
+        function generateBadgeHTML(goal, isCustom) {
+            const stats = getGoalStats(goal.days);
+            let progressPercent = Math.floor((stats.currentProgress / goal.days) * 100);
+            if (progressPercent > 100) progressPercent = 100;
+            const opacity = stats.isActive ? '1' : (stats.count > 0 ? '0.85' : '0.6');
+            const deleteHtml = isCustom ?
+                `<i class="fa-solid fa-trash" style="color:var(--accent-red); opacity:0.8; cursor:pointer; padding: 5px; position:relative; z-index:5;" onclick="deleteCustomGoal('${goal.id}')"></i>` :
+                '';
+            const rgbMap = { '#cd7f32': '205,127,50', '#c0c0c0': '192,192,192', '#ffd700': '255,215,0',
+                '#ff6b6b': '255,107,107', '#00ffff': '0,255,255', 'var(--accent-blue)': '42,101,240' };
+            const rgbColor = rgbMap[goal.color] || '42,101,240';
+            let countHtml = '';
+            if (stats.count > 0) countHtml = `<div class="badge-multiplier">x${stats.count}</div>`;
+
+            return `
+            <div class="badge-card ${stats.isActive ? 'unlocked' : ''}" style="--badge-rgb: ${rgbColor}; opacity: ${opacity};">
+                ${countHtml}
+                ${stats.isActive ? `<div class="badge-glow" style="background: radial-gradient(circle at right, rgba(${rgbColor},0.2) 0%, transparent 70%);"></div>` : ''}
+                <div class="badge-icon-box" style="color: ${stats.isActive ? `rgb(${rgbColor})` : 'var(--text-muted)'};"><i class="fa-solid ${goal.icon}"></i></div>
+                <div class="badge-info">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <h4 style="font-size: 14px; margin: 0; color: ${stats.isActive ? 'var(--text-main)' : 'var(--text-muted)'}; font-weight: bold;">
+                            ${goal.title} <span style="font-size:11px; font-weight:normal; opacity:0.8;">(${goal.days} روز)</span>
+                        </h4>
+                        <div style="display:flex; align-items:center; gap: 8px; position:relative; z-index:3;">
+                            ${deleteHtml}
+                            ${stats.isActive ? `<i class="fa-solid fa-medal" style="color: rgb(${rgbColor}); font-size: 18px; filter: drop-shadow(0 0 6px rgba(${rgbColor}, 0.5));"></i>` : `<span style="font-size: 12px; color: var(--text-muted); font-weight: bold;">${progressPercent}٪</span>`}
+                        </div>
+                    </div>
+                    <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progressPercent}%; background: ${stats.isActive ? `rgb(${rgbColor})` : 'var(--accent-blue)'}; box-shadow: ${stats.isActive ? `0 0 8px rgba(${rgbColor}, 0.6)` : 'none'}"></div></div>
+                </div>
+            </div>
+        `;
+        }
+
+        // --- Calendar Rendering ---
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const monthNames = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 'مهر', 'آبان', 'آذر', 'دی', 'بهمن',
+            'اسفند'];
+            document.getElementById('month-name').innerText =
+                `${monthNames[currentJm - 1]} ${new Intl.NumberFormat('fa-IR', { useGrouping: false }).format(currentJy)}`;
+
+            const firstDayDate = new Date(j2g(currentJy, currentJm, 1)[0], j2g(currentJy, currentJm, 1)[1] - 1, j2g(currentJy,
+                currentJm, 1)[2]);
+            let startDayIdx = firstDayDate.getDay() + 1;
+            if (startDayIdx > 6) startDayIdx = 0;
+            const remain = currentJy % 33;
+            const isLeap = [1, 5, 9, 13, 17, 22, 26, 30].includes(remain);
+            const daysInMonth = (currentJm <= 6) ? 31 : ((currentJm <= 11) ? 30 : (isLeap ? 30 : 29));
+
+            for (let i = 0; i < startDayIdx; i++) grid.innerHTML += `<div></div>`;
+
+            const todayG_Time = new Date(todayG.getFullYear(), todayG.getMonth(), todayG.getDate()).getTime();
+            let trackingStartTime = null;
+            if (appData.isStarted && appData.slips.length > 0) trackingStartTime = new Date(appData.slips[0].date).setHours(0,
+                0, 0, 0);
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const cellG = j2g(currentJy, currentJm, d);
+                const cellTime = new Date(cellG[0], cellG[1] - 1, cellG[2]).getTime();
+                const isFuture = cellTime > todayG_Time;
+                let className = 'day-cell' + (cellTime === todayG_Time ? ' today' : '');
+                let wdIcon = '';
+
+                if (appData.isStarted) {
+                    const hasSlip = appData.slips.some(slip => new Date(slip.date).setHours(0, 0, 0, 0) === cellTime);
+                    const hasWd = appData.wetDreams && appData.wetDreams.includes(cellTime);
+
+                    if (hasSlip) className += ' slip';
+                    else if (trackingStartTime !== null && !isFuture && cellTime >= trackingStartTime) className +=
+                        ' clean';
+
+                    if (hasWd) wdIcon =
+                        '<i class="fa-solid fa-droplet" style="position: absolute; bottom: 3px; font-size: 10px; color: var(--accent-blue);"></i>';
+                }
+
+                let clickHandler = (isFuture || !appData.isStarted) ? '' :
+                    `onclick="openDateSpecificModal(${cellG[0]}, ${cellG[1]}, ${cellG[2]}, ${currentJy}, ${currentJm}, ${d}, '${monthNames[currentJm - 1]}')"`;
+                grid.innerHTML +=
+                    `<div class="${className}" ${clickHandler} style="${(isFuture || !appData.isStarted) ? 'opacity:0.3; cursor:default;' : ''}">${new Intl.NumberFormat('fa-IR').format(d)}${wdIcon}</div>`;
+            }
+        }
+
+        function changeMonth(dir) { currentJm += dir; if (currentJm > 12) { currentJm = 1;
+                currentJy++; } else if (currentJm < 1) { currentJm = 12;
+                currentJy--; } renderCalendar(); }
+
+        // Init App
+        initApp();
+
+        // --- PWA: Service Worker Registration ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js').catch(err => console.log('SW registration failed:', err));
+            });
+        }
+    </script>
+
+</body>
+</html>
