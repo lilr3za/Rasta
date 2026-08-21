@@ -1,4 +1,4 @@
-const CACHE_NAME = 'iron-will-cache-v1';
+const CACHE_NAME = 'iron-will-cache-v2';
 const ASSETS_TO_CACHE = [
   './index.html',
   './manifest.json',
@@ -26,7 +26,6 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cached) => {
       return cached || fetch(event.request).then((response) => {
-        // Cache same-origin GET requests only
         if (event.request.method === 'GET' && response.status === 200 && event.request.url.startsWith(self.location.origin)) {
           const clone = response.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
