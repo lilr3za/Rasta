@@ -1,4 +1,4 @@
-const CACHE_NAME = 'iron-will-cache-v6';
+const CACHE_NAME = 'iron-will-cache-v7';
 const ASSETS_TO_CACHE = [
   './index.html',
   './manifest.json',
