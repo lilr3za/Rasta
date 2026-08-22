@@ -1,13 +1,13 @@
 {
-  "name": "اراده آهنین",
-  "short_name": "اراده آهنین",
-  "description": "ردیاب عادت و پیگیری روزهای پاکی",
+  "name": "ری‌وایر",
+  "short_name": "ری‌وایر",
+  "description": "ری‌وایر (Rewire) - ردیاب عادت و پیگیری روزهای پاکی",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#052E2B",
-  "theme_color": "#052E2B",
+  "background_color": "#0c0d0f",
+  "theme_color": "#0c0d0f",
   "lang": "fa",
   "dir": "rtl",
   "icons": [

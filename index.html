@@ -2,13 +2,13 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>اراده آهنین | Habit Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>ری‌وایر | Rewire</title>
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#052E2B">
+<meta name="theme-color" content="#0c0d0f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="اراده آهنین">
+<meta name="apple-mobile-web-app-title" content="ری‌وایر">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/chart.js">
@@ -54,6 +54,9 @@ font-family: 'Vazirmatn', sans-serif;
 -webkit-tap-highlight-color: transparent;
 }
 
+html, body {
+background-color: var(--bg-main);
+}
 body {
 background-color: var(--bg-main);
 color: var(--text-main);
@@ -61,6 +64,8 @@ background-attachment: fixed;
 display: flex;
 justify-content: center;
 transition: 0.3s ease;
+min-height: 100vh;
+min-height: 100dvh;
 }
 body:not(.theme-light) {
 background-image: radial-gradient(ellipse at top right, rgba(80, 65, 40, 0.4) 0%, var(--bg-main) 50%);
@@ -70,7 +75,8 @@ background-image: radial-gradient(ellipse at top right, rgba(80, 65, 40, 0.4) 0%
 width: 100%;
 max-width: 480px;
 min-height: 100vh;
-padding: 20px 20px 110px 20px;
+min-height: 100dvh;
+padding: calc(20px + env(safe-area-inset-top)) 20px calc(110px + env(safe-area-inset-bottom)) 20px;
 position: relative;
 }
 
@@ -85,6 +91,20 @@ header h1 {
 font-size: 22px;
 font-weight: 900;
 letter-spacing: -0.5px;
+line-height: 1.2;
+}
+.app-title-wrap {
+display: flex;
+flex-direction: column;
+align-items: flex-end;
+}
+.app-subtitle {
+font-size: 11px;
+font-weight: 700;
+color: var(--text-muted);
+letter-spacing: 3px;
+direction: ltr;
+margin-top: 1px;
 }
 .header-actions {
 display: flex;
@@ -398,14 +418,58 @@ font-weight: bold;
 border: 2px solid var(--text-main);
 }
 .day-cell.triggered {
-color: var(--accent-yellow-ring);
+background: var(--accent-yellow-ring);
+color: #2a1f00;
 font-weight: bold;
+border: none;
 }
-.day-cell.clean.triggered {
-color: var(--accent-yellow-ring);
+
+.badge-icon-number {
+font-size: 20px;
+font-weight: 900;
+direction: ltr;
+line-height: 1;
 }
-.day-cell.slip.triggered {
-color: var(--accent-yellow-ring);
+.earned-badges-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 10px;
+}
+.earned-badge-card {
+background: var(--input-bg);
+border: 1px solid var(--border-color);
+border-radius: 16px;
+padding: 14px 8px;
+text-align: center;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 6px;
+}
+.earned-badge-icon {
+font-size: 44px;
+font-weight: 900;
+line-height: 1;
+direction: ltr;
+padding: 10px 0 6px 0;
+color: rgb(var(--badge-rgb));
+-webkit-text-stroke: 2px rgba(0,0,0,0.35);
+text-shadow:
+0 2px 0 rgba(0,0,0,0.28),
+0 4px 0 rgba(0,0,0,0.22),
+0 3px 8px rgba(0,0,0,0.5),
+0 0 22px rgba(var(--badge-rgb), 0.55);
+}
+.earned-badge-name {
+font-size: 11px;
+font-weight: bold;
+color: var(--text-main);
+line-height: 1.4;
+}
+.earned-badge-count {
+font-size: 10px;
+color: var(--text-muted);
+font-weight: bold;
 }
 
 .calendar-legend-card {
@@ -799,7 +863,7 @@ background: linear-gradient(to left, #8b0000, #ff4444, #ff8888, #ffcccc, #fff0f0
 
 .bottom-nav {
 position: fixed;
-bottom: 20px;
+bottom: calc(20px + env(safe-area-inset-bottom));
 left: 50%;
 transform: translateX(-50%);
 background: var(--nav-bg);
@@ -1380,7 +1444,7 @@ margin-bottom: 6px;
 <div id="lock-screen" class="modal-overlay" style="background: var(--bg-main); z-index: 10000; flex-direction: column;">
 <div class="modal-content" style="background: transparent; border: none; box-shadow: none;">
 <i class="fa-solid fa-lock" style="font-size: 50px; color: var(--accent-blue); margin-bottom: 20px;"></i>
-<h2 style="color: var(--text-main); margin-bottom: 20px;">اراده آهنین</h2>
+<h2 style="color: var(--text-main); margin-bottom: 20px;">ری‌وایر</h2>
 <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">جهت ورود رمز عبور خود را وارد کنید.</p>
 <input type="password" id="unlock-pin-input" class="modal-input pin-input" placeholder="••••" inputmode="numeric" onkeypress="handlePinEnter(event)" maxlength="8">
 <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="unlockApp()">ورود</button>
@@ -1408,7 +1472,10 @@ margin-bottom: 6px;
 
 <div class="app-container" id="main-app-container" style="display: none;">
 <header>
-<h1>اراده آهنین</h1>
+<div class="app-title-wrap">
+<h1>ری‌وایر</h1>
+<span class="app-subtitle">REWIRE</span>
+</div>
 <div class="header-actions">
 <div class="settings-icon" onclick="generateShareImage()" title="اشتراک‌گذاری پیشرفت"><i class="fa-solid fa-share-nodes"></i></div>
 <div class="settings-icon" onclick="lockAppManual()"><i class="fa-solid fa-lock"></i></div>
@@ -1488,7 +1555,7 @@ margin-bottom: 6px;
 <ul>
 <li><b style="color:var(--accent-green)">تقویم (سبز):</b> روزهای پاک</li>
 <li><b style="color:var(--accent-red)">تقویم (قرمز):</b> روزهای لغزش</li>
-<li><b style="color:var(--accent-yellow-ring)">عدد زرد رنگ:</b> مشاهده محتوای تحریک‌کننده</li>
+<li><b style="color:var(--accent-yellow-ring)">تقویم (زرد):</b> روزی که فقط محتوای تحریک‌کننده ثبت شده (بدون لغزش)</li>
 <li><b style="color:var(--accent-blue)">قطره آبی:</b> احتلام طبیعی</li>
 </ul>
 </div>
@@ -1518,8 +1585,8 @@ margin-bottom: 6px;
 <span>روز لغزش</span>
 </div>
 <div class="legend-item trigger-feature">
-<span class="legend-swatch" style="background: var(--input-bg); border: 1px solid var(--border-color); color: var(--accent-yellow-ring); font-weight: bold; font-size: 11px; display:flex; align-items:center; justify-content:center;">۱</span>
-<span>محتوای تحریک‌کننده</span>
+<span class="legend-swatch" style="background: var(--accent-yellow-ring);"></span>
+<span>محتوای تحریک‌کننده (بدون لغزش)</span>
 </div>
 <div class="legend-item">
 <span class="legend-swatch" style="background: var(--input-bg); border: 1px solid var(--border-color); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-droplet" style="font-size: 10px; color: var(--accent-blue);"></i></span>
@@ -1552,6 +1619,15 @@ margin-bottom: 6px;
 <div id="custom-badges-container"></div>
 </div>
 </div>
+<div id="earned-badges-wrapper" style="display: none;">
+<div class="card" style="margin-bottom: 16px;">
+<h3 style="margin-bottom: 15px; font-size: 15px; color: var(--text-main); display: flex; align-items: center; gap: 8px;">
+<i class="fa-solid fa-trophy" style="color: var(--accent-gold);"></i> مدال‌های کسب‌شده شما
+</h3>
+<div id="earned-badges-container" class="earned-badges-grid"></div>
+</div>
+</div>
+
 <div class="card">
 <h3 style="margin-bottom: 15px; font-size: 15px; display: flex; align-items: center; gap: 8px;">
 <i class="fa-solid fa-medal" style="color: var(--accent-gold)"></i> دستاوردها و اهداف سیستم
@@ -3634,7 +3710,7 @@ ctx.textBaseline = 'alphabetic';
 ctx.fillStyle = '#ffffff';
 ctx.font = 'bold 30px Vazirmatn, sans-serif';
 ctx.direction = 'rtl';
-ctx.fillText('اراده آهنین', w / 2, cy + 82);
+ctx.fillText('ری‌وایر', w / 2, cy + 82);
 
 ctx.fillStyle = 'rgba(255,255,255,0.55)';
 ctx.font = '20px Vazirmatn, sans-serif';
@@ -3842,6 +3918,28 @@ customWrapper.style.display = 'block';
 generateBadgeHTML(goal, true); });
 } else { customWrapper.style.display = 'none'; }
 predefinedGoals.forEach(goal => { predefContainer.innerHTML += generateBadgeHTML(goal, false); });
+renderEarnedBadges();
+}
+
+function renderEarnedBadges() {
+const wrapper = document.getElementById('earned-badges-wrapper');
+const container = document.getElementById('earned-badges-container');
+if (!wrapper || !container) return;
+const allGoals = [...predefinedGoals, ...(appData.customGoals || [])];
+const rgbMap = { '#cd7f32': '205,127,50', '#c0c0c0': '192,192,192', '#ffd700': '255,215,0', '#ff6b6b': '255,107,107', '#00ffff': '0,255,255', 'var(--accent-blue)': '42,101,240' };
+const earned = allGoals.map(goal => ({ goal, stats: getGoalStats(goal.days) })).filter(g => g.stats.count > 0)
+.sort((a, b) => a.goal.days - b.goal.days);
+if (earned.length === 0) { wrapper.style.display = 'none'; container.innerHTML = ''; return; }
+wrapper.style.display = 'block';
+container.innerHTML = earned.map(({ goal, stats }) => {
+const rgbColor = rgbMap[goal.color] || '42,101,240';
+const dayLabel = new Intl.NumberFormat('fa-IR').format(goal.days);
+return `<div class="earned-badge-card" style="--badge-rgb: ${rgbColor};">
+<div class="earned-badge-icon">${goal.days}</div>
+<div class="earned-badge-name">${dayLabel} روز پاکی</div>
+<div class="earned-badge-count">${new Intl.NumberFormat('fa-IR').format(stats.count)} بار کسب شده</div>
+</div>`;
+}).join('');
 }
 
 function getGoalStats(goalDays) {
@@ -3872,7 +3970,7 @@ const rgbMap = { '#cd7f32': '205,127,50', '#c0c0c0': '192,192,192', '#ffd700': '
 const rgbColor = rgbMap[goal.color] || '42,101,240';
 let countHtml = stats.count > 0 ? `<div class="badge-multiplier">x${stats.count}</div>` : '';
 return `<div class="badge-card ${stats.isActive ? 'unlocked' : ''}" style="--badge-rgb: ${rgbColor}; opacity: ${opacity};">
-${countHtml} ${stats.isActive ? `<div class="badge-glow" style="background: radial-gradient(circle at right, rgba(${rgbColor},0.2) 0%, transparent 70%);"></div>` : ''} <div class="badge-icon-box" style="color: ${stats.isActive ? `rgb(${rgbColor})` : 'var(--text-muted)'};"><i class="fa-solid ${goal.icon}"></i></div>
+${countHtml} ${stats.isActive ? `<div class="badge-glow" style="background: radial-gradient(circle at right, rgba(${rgbColor},0.2) 0%, transparent 70%);"></div>` : ''} <div class="badge-icon-box" style="color: ${stats.isActive ? `rgb(${rgbColor})` : 'var(--text-muted)'};"><span class="badge-icon-number">${goal.days}</span></div>
 <div class="badge-info">
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
 <h4 style="font-size: 14px; margin: 0; color: ${stats.isActive ? 'var(--text-main)' : 'var(--text-muted)'}; font-weight: bold;"> ${goal.title} <span style="font-size:11px; font-weight:normal; opacity:0.8;">(${goal.days} روز)</span> </h4> <div style="display:flex; align-items:center; gap: 8px; position:relative; z-index:3;"> ${deleteHtml}
@@ -3914,7 +4012,6 @@ if (hasSlip) className += ' slip';
 else if (trackingStartTime !== null && !isFuture && cellTime >= trackingStartTime) className +=
 ' clean';
 if (hasTrigger && !hasSlip) className += ' triggered';
-if (hasSlip && hasTrigger) className += ' triggered';
 if (hasWd) wdIcon =
 '<i class="fa-solid fa-droplet" style="position: absolute; bottom: 3px; font-size: 10px; color: var(--accent-blue);"></i>';
 }
@@ -3938,11 +4035,11 @@ content: 'برای شروع، روی دکمه <b>"شروع سفر پاکی"</b> 
 { id: 'h2', icon: 'fa-bolt', color: '#ff3b30', title: 'ثبت لغزش و مدیریت آن',
 content: 'لغزش به معنای شکست در مسیر پاکی است و <b>تایمر شما را صفر می‌کند</b>. می‌توانید لغزش را از صفحه خانه (دکمه قرمز) یا از طریق تقویم (کلیک روی هر روز) ثبت کنید. هنگام ثبت، می‌توانید علت لغزش (استرس، خستگی، محتوای تحریک‌کننده و...) را با برچسب‌ها مشخص کنید تا در بخش آنالیز، ریشه‌های اصلی شکست شما مشخص شود. همچنین امکان <b>بازگردانی آخرین لغزش</b> از صفحه خانه وجود دارد.' },
 { id: 'h3', icon: 'fa-triangle-exclamation', color: '#e6a800', title: 'ثبت محتوای تحریک‌کننده',
-content: 'شما می‌توانید مواجهه با هر نوع محتوای تحریک‌کننده (ویدیو، عکس، شبکه اجتماعی و...) را ثبت کنید. این ثبت <b>تایمر پاکی را صفر نمی‌کند</b> اما به شما کمک می‌کند الگوهای خطرناک را شناسایی کنید. روزهایی که محتوای تحریک‌کننده ثبت شده باشد، در تقویم با <b>عدد روز به رنگ زرد</b> مشخص می‌شوند. در بخش نمودارها نیز می‌توانید روند این مواجهه‌ها را تحلیل کنید.' },
+content: 'شما می‌توانید مواجهه با هر نوع محتوای تحریک‌کننده (ویدیو، عکس، شبکه اجتماعی و...) را ثبت کنید. این ثبت <b>تایمر پاکی را صفر نمی‌کند</b> اما به شما کمک می‌کند الگوهای خطرناک را شناسایی کنید. روزهایی که فقط محتوای تحریک‌کننده ثبت شده باشد (بدون لغزش)، در تقویم با <b>دایره زرد رنگ</b> مشخص می‌شوند؛ اگر همان روز لغزش هم ثبت شده باشد، رنگ قرمز لغزش اولویت دارد. در بخش نمودارها نیز می‌توانید روند این مواجهه‌ها را تحلیل کنید.' },
 { id: 'h4', icon: 'fa-droplet', color: '#2a65f0', title: 'احتلام و مدیریت آن',
 content: 'احتلام (خروج منی در خواب) یک فرآیند <b>کاملاً طبیعی و بیولوژیک</b> است و به هیچ وجه نشانه ضعف اراده نیست. ثبت احتلام در برنامه <b>تایمر پاکی را صفر نمی‌کند</b> و صرفاً برای پایش سلامت بدن و تنظیم پیام‌های مربی هوشمند استفاده می‌شود. روزهای دارای احتلام با یک قطره آبی رنگ در تقویم مشخص می‌شوند.' },
 { id: 'h5', icon: 'fa-calendar', color: '#8a8d91', title: 'تقویم و علائم آن',
-content: '<b>رنگ سبز:</b> روزهای کاملاً پاک پس از شروع مسیر.<br><b>رنگ قرمز:</b> روزهایی که لغزش در آن‌ها ثبت شده است.<br><b>عدد زرد رنگ:</b> روزهایی که محتوای تحریک‌کننده مشاهده شده (تایمر صفر نشده).<br><b>قطره آبی:</b> روزهای دارای احتلام طبیعی.<br>با کلیک روی هر روز می‌توانید اطلاعات آن را مدیریت کنید (ثبت/ویرایش/حذف لغزش، محتوای تحریک‌کننده و احتلام).' },
+content: '<b>رنگ سبز:</b> روزهای کاملاً پاک پس از شروع مسیر.<br><b>رنگ قرمز:</b> روزهایی که لغزش در آن‌ها ثبت شده است.<br><b>رنگ زرد:</b> روزهایی که فقط محتوای تحریک‌کننده مشاهده شده (بدون لغزش، تایمر صفر نشده). اگر همان روز لغزش هم رخ داده باشد، رنگ قرمز اولویت دارد.<br><b>قطره آبی:</b> روزهای دارای احتلام طبیعی.<br>با کلیک روی هر روز می‌توانید اطلاعات آن را مدیریت کنید (ثبت/ویرایش/حذف لغزش، محتوای تحریک‌کننده و احتلام).' },
 { id: 'h6', icon: 'fa-bullseye', color: '#ffd700', title: 'اهداف و مدال‌ها',
 content: 'در بخش اهداف می‌توانید <b>اهداف شخصی</b> (مانند ۳۰ روز پاکی) تعریف کنید. همچنین مدال‌های از پیش تعریف‌شده (۳، ۷، ۲۱، ۴۰ و ۹۰ روز) وجود دارند. هر بار که به یک هدف برسید، مدال مربوطه فعال می‌شود و شمارنده دفعات کسب آن افزایش می‌یابد. نوار پیشرفت زیر هر مدال نشان می‌دهد چقدر به هدف بعدی نزدیک هستید.' },
 { id: 'h7', icon: 'fa-chart-bar', color: '#4b8af3', title: 'نمودارها و آمار',
