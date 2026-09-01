@@ -2198,9 +2198,11 @@ margin-bottom: 20px;
 <div id="invite-link-result" style="display:none; margin-top: 12px; text-align:right;">
 <div class="invite-link-box">
 <input type="text" id="invite-link-value" readonly>
-<button class="reset-btn" onclick="copyInviteLink()"><i class="fa-solid fa-copy"></i></button>
+<button class="reset-btn" onclick="shareInviteLink()" title="اشتراک‌گذاری"><i class="fa-solid fa-share-nodes"></i></button>
+<button class="reset-btn" onclick="copyInviteLink()" title="کپی"><i class="fa-solid fa-copy"></i></button>
 </div>
-<p style="font-size:11px; color:var(--text-muted);">این لینک را برای دوست خود ارسال کنید. با ورود او به لینک، رقابت شروع می‌شود.</p>
+<p style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">این لینک را برای دوست خود ارسال کنید. با ورود او به لینک، رقابت شروع می‌شود.</p>
+<button class="btn-delete" style="margin-top:0;" onclick="cancelWaitingChallenge()"><i class="fa-solid fa-ban"></i> لغو این چالش</button>
 </div>
 
 <div class="compete-divider">یا</div>
@@ -2214,7 +2216,8 @@ margin-bottom: 20px;
 </div>
 
 <div class="card" id="medal-showcase-card">
-<h3 style="margin-bottom: 15px; font-size: 15px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-medal" style="color:var(--accent-gold);"></i> ویترین مدال‌های رقابت</h3>
+<h3 style="margin-bottom: 4px; font-size: 15px; display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-medal" style="color:var(--accent-gold);"></i> ویترین مدال‌های رقابت</h3>
+<p id="medal-showcase-stats" style="font-size:11px; color:var(--text-muted); margin-bottom:15px;"></p>
 <div id="medal-showcase-grid" class="medal-grid"></div>
 <p id="medal-showcase-empty" class="data-warning" style="display:none;">هنوز مدالی کسب نکرده‌اید. اولین رقابت خود را شروع کنید!</p>
 </div>
@@ -2250,6 +2253,7 @@ margin-bottom: 20px;
 <b id="compete-days-left">-</b> روز تا پایان رقابت <span id="compete-duration-label"></span>
 </div>
 <p style="font-size:11px; color:var(--text-muted); text-align:center; line-height:1.8;">امتیاز بر اساس پیشرفت شخصی هر فرد نسبت به میانگین گذشته‌ خودش محاسبه می‌شود، نه صرفاً طول لغزش. هر روز که پاک بمانید امتیاز می‌گیرید و اگر بهتر از حد معمول خودتان عمل کنید، امتیاز بیشتری کسب می‌کنید.</p>
+<button class="undo-btn" style="width:100%; text-align:center; margin-top:16px;" onclick="cancelActiveChallenge()"><i class="fa-solid fa-flag"></i> ترک این چالش</button>
 </div>
 </div>
 
@@ -2292,7 +2296,7 @@ margin-bottom: 20px;
 <div class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-regular fa-calendar"></i><span>تقویم</span></div>
 <div class="nav-item" onclick="switchTab('goals', this)"><i class="fa-solid fa-bullseye"></i><span>اهداف</span></div>
 <div class="nav-item" onclick="switchTab('insights', this)"><i class="fa-solid fa-chart-bar"></i><span>آنالیز</span></div>
-<div class="nav-item" onclick="switchTab('compete', this)"><i class="fa-solid fa-crown"></i><span>رقابت</span></div>
+<div class="nav-item" id="nav-item-compete" onclick="switchTab('compete', this)"><i class="fa-solid fa-crown"></i><span>رقابت</span></div>
 <div class="nav-item" onclick="switchTab('help-page', this)"><i class="fa-solid fa-circle-question"></i><span>راهنما</span></div>
 </nav>
 
@@ -4598,7 +4602,7 @@ content: 'در لحظات وسوسه شدید، روی کارت <b>"وسوسه �
 { id: 'h10', icon: 'fa-share-nodes', color: '#34c759', title: 'اشتراک‌گذاری پیشرفت',
 content: 'با کلیک روی دکمه <b>Share</b> در بالای صفحه (کنار قفل و تنظیمات)، برنامه یک تصویر زیبا و عمومی از پیشرفت شما تولید می‌کند. این تصویر <b>هیچ اشاره مستقیمی به موضوع خاصی ندارد</b> و شامل معیارهایی مانند روزهای پایداری، بهترین رکورد و کل روزهای مسیر است. می‌توانید آن را در شبکه‌های اجتماعی به اشتراک بگذارید.' },
 { id: 'h11', icon: 'fa-crown', color: '#ffd700', title: 'رقابت با دوستان',
-content: 'در بخش <b>رقابت</b> می‌توانید یک دوست را به چالش پاکی ۱۴ یا ۳۰ روزه دعوت کنید. برای شروع، یک آواتار، نام نمایشی و آیدی اختصاصی انتخاب می‌کنید (فقط یک‌بار لازم است و بعد از آن ذخیره می‌ماند).<br><br>برای دعوت، یا <b>لینک دعوت</b> بسازید و برای دوستتان بفرستید، یا مستقیم <b>آیدی</b> او را وارد کرده و درخواست بفرستید. وقتی چالش شروع شود، دو نوار پیشرفت کنار هم امتیاز هر دو نفر را زنده نشان می‌دهند.<br><br><b>امتیازدهی عادلانه است:</b> امتیاز صرفاً بر اساس طول لغزش نیست، بلکه بر اساس <b>پیشرفت شخصی هرکس نسبت به میانگین گذشته خودش</b> حساب می‌شود؛ وضعیت شما در لحظه شروع چالش (چند روز از آخرین لغزشتان گذشته) هم در امتیاز اولیه لحاظ می‌شود. در پایان مدت رقابت، برنده بر اساس اختلاف امتیاز مدال طلا، نقره یا برنز می‌گیرد.<br><br>در این بخش فقط نام، آواتار، آیدی و امتیاز روزانه شما (که از روی روزهای پاک شما محاسبه می‌شود) با حریفتان به اشتراک گذاشته می‌شود؛ هیچ جزئیاتی از لغزش‌ها یا دلایل آن‌ها به اشتراک گذاشته نمی‌شود.<br><br>این بخش به <b>اتصال اینترنت</b> نیاز دارد؛ بقیه‌ی برنامه بدون اینترنت هم مثل همیشه کار می‌کند.' }
+content: 'در بخش <b>رقابت</b> می‌توانید یک دوست را به چالش پاکی ۱۴ یا ۳۰ روزه دعوت کنید. برای شروع، یک آواتار، نام نمایشی و آیدی اختصاصی انتخاب می‌کنید (فقط یک‌بار لازم است و بعد از آن ذخیره می‌ماند).<br><br>برای دعوت، یا <b>لینک دعوت</b> بسازید و برای دوستتان بفرستید، یا مستقیم <b>آیدی</b> او را وارد کرده و درخواست بفرستید. وقتی چالش شروع شود، دو نوار پیشرفت کنار هم امتیاز هر دو نفر را زنده نشان می‌دهند.<br><br><b>امتیازدهی عادلانه است:</b> امتیاز صرفاً بر اساس طول لغزش نیست، بلکه بر اساس <b>پیشرفت شخصی هرکس نسبت به میانگین گذشته خودش</b> حساب می‌شود؛ وضعیت شما در لحظه شروع چالش (چند روز از آخرین لغزشتان گذشته) هم در امتیاز اولیه لحاظ می‌شود. در پایان مدت رقابت، برنده بر اساس اختلاف امتیاز مدال طلا، نقره یا برنز می‌گیرد.<br><br>اگر منتظر پیوستن دوستتان هستید می‌توانید چالش را <b>لغو کنید</b>، و در طول یک چالش فعال هم امکان <b>ترک چالش</b> در هر زمان وجود دارد. تعداد برد و باخت‌های شما هم در ویترین مدال‌ها نمایش داده می‌شود.<br><br>در این بخش فقط نام، آواتار، آیدی و امتیاز روزانه شما (که از روی روزهای پاک شما محاسبه می‌شود) با حریفتان به اشتراک گذاشته می‌شود؛ هیچ جزئیاتی از لغزش‌ها یا دلایل آن‌ها به اشتراک گذاشته نمی‌شود.<br><br>این بخش به <b>اتصال اینترنت</b> نیاز دارد؛ بقیه‌ی برنامه بدون اینترنت هم مثل همیشه کار می‌کند.' }
  ];
 
 container.innerHTML = categories.map(cat => `<div class="help-page-category" id="help-cat-${cat.id}">
@@ -4647,8 +4651,12 @@ initApp();
 /* =========================================================================
    COMPETITION FEATURE (Firebase Firestore + Anonymous Auth)
    -------------------------------------------------------------------------
-   Uses your Firebase project's config below (Firebase Console > Project
-   settings > General > Your apps > SDK setup).
+   Data model (chosen to avoid needing any Firestore composite indexes):
+     users/{uid}            -> { customId, name, avatar, medals[], wins,
+                                  losses, currentRoomId }
+     users/{uid}/invites/*  -> pending challenge invites addressed to uid
+     usernames/{customId}   -> { uid }   (id -> uid lookup)
+     rooms/{roomId}         -> the competition itself
    ========================================================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyBEfdK3412qL9ZewBSFoAQWGWSqWzaXcOs",
@@ -4665,7 +4673,7 @@ const COMPETE_LS_PROFILE_KEY = 'rewire_compete_profile_v1';
 
 let fbApp = null, fbAuth = null, fbDb = null;
 let myUid = null;
-let myProfile = null; // { customId, name, avatar, medals }
+let myProfile = null; // { customId, name, avatar, medals, wins, losses, currentRoomId }
 let selectedAvatar = AVATAR_OPTIONS[0];
 let selectedDuration = 14;
 let activeRoomId = null;
@@ -4679,16 +4687,13 @@ let competeAuthReady = false;
 /* ---------------- Local cache (fast restore, no re-prompt) ---------------- */
 function cacheProfileLocally() {
     if (!myProfile || !myUid) return;
-    try {
-        localStorage.setItem(COMPETE_LS_PROFILE_KEY, JSON.stringify({ uid: myUid, profile: myProfile }));
-    } catch (e) { /* storage full or unavailable - non-fatal */ }
+    try { localStorage.setItem(COMPETE_LS_PROFILE_KEY, JSON.stringify({ uid: myUid, profile: myProfile })); }
+    catch (e) { /* storage unavailable - non-fatal */ }
 }
-
 function readCachedProfile() {
     try {
         const raw = localStorage.getItem(COMPETE_LS_PROFILE_KEY);
-        if (!raw) return null;
-        return JSON.parse(raw);
+        return raw ? JSON.parse(raw) : null;
     } catch (e) { return null; }
 }
 
@@ -4714,10 +4719,7 @@ function initCompeteFeature() {
                     showCompeteState('compete-offline');
                 });
             }
-        }, (err) => {
-            console.log('onAuthStateChanged error:', err);
-            showCompeteState('compete-offline');
-        });
+        }, (err) => { console.log('onAuthStateChanged error:', err); showCompeteState('compete-offline'); });
     } catch (err) {
         console.log('Firebase init error:', err);
         showCompeteState('compete-offline');
@@ -4725,14 +4727,10 @@ function initCompeteFeature() {
 }
 
 function onAuthReady() {
-    // Instant restore from local cache to avoid re-prompting / flicker,
-    // while Firestore is refreshed in the background underneath it.
     const cached = readCachedProfile();
     if (cached && cached.uid === myUid && cached.profile) {
         myProfile = cached.profile;
-        if (document.getElementById('compete').classList.contains('active')) {
-            renderCompeteTab();
-        }
+        if (document.getElementById('compete').classList.contains('active')) renderCompeteTab();
     }
     loadMyProfile();
 }
@@ -4744,14 +4742,10 @@ window.addEventListener('online', () => {
     }
 });
 window.addEventListener('offline', () => {
-    if (document.getElementById('compete').classList.contains('active')) {
-        showCompeteState('compete-offline');
-    }
+    if (document.getElementById('compete').classList.contains('active')) showCompeteState('compete-offline');
 });
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && activeRoomId) {
-        syncMyCompetitionScore();
-    }
+    if (document.visibilityState === 'visible' && activeRoomId) syncMyCompetitionScore();
 });
 
 function showCompeteState(stateId) {
@@ -4769,42 +4763,42 @@ function renderCompeteTab() {
     renderCompeteHome();
 }
 
+function goToCompeteTab() {
+    const navEl = document.getElementById('nav-item-compete');
+    if (navEl) switchTab('compete', navEl);
+}
+
 function loadMyProfile() {
     fbDb.collection('users').doc(myUid).get().then((doc) => {
         if (doc.exists) {
             myProfile = doc.data();
+            if (!myProfile.medals) myProfile.medals = [];
+            if (typeof myProfile.wins !== 'number') myProfile.wins = 0;
+            if (typeof myProfile.losses !== 'number') myProfile.losses = 0;
             cacheProfileLocally();
             updateCompeteIdSettingLabel();
             listenForMyInvites();
             if (pendingJoinRoomId) tryJoinPendingRoom();
-            else checkForActiveOrWaitingRoom();
+            else resumeMyRoomIfAny();
         } else {
             myProfile = null;
-            if (document.getElementById('compete').classList.contains('active')) {
-                showCompeteState('compete-needs-profile');
-            }
+            if (document.getElementById('compete').classList.contains('active')) showCompeteState('compete-needs-profile');
         }
     }).catch((err) => {
         console.log('loadMyProfile error:', err);
-        // If we already restored a cached profile, keep showing it instead
-        // of bouncing the user back to a connection-error screen.
         if (!myProfile) showCompeteState('compete-offline');
     });
 }
 
 /* ---------------- Onboarding carousel ---------------- */
 function openCompeteOnboarding(skipToProfile) {
-    if (skipToProfile || localStorage.getItem(COMPETE_LS_ONBOARD_KEY)) {
-        openProfileSetup();
-        return;
-    }
+    if (skipToProfile || localStorage.getItem(COMPETE_LS_ONBOARD_KEY)) { openProfileSetup(); return; }
     carouselIndex = 0;
     document.getElementById('carousel-track').style.transform = 'translateX(0%)';
     document.querySelectorAll('#carousel-dots span').forEach((d,i) => d.classList.toggle('active', i===0));
     document.getElementById('carousel-next-btn').innerText = 'بعدی';
     document.getElementById('carousel-modal').classList.add('active');
 }
-
 function carouselNext() {
     carouselIndex++;
     if (carouselIndex >= 3) {
@@ -4835,7 +4829,6 @@ function openProfileSetup() {
     document.getElementById('profile-id-status').innerText = '';
     document.getElementById('profile-setup-modal').classList.add('active');
 }
-
 function pickAvatar(avatar, el) {
     selectedAvatar = avatar;
     document.querySelectorAll('.avatar-option').forEach(o => o.classList.remove('selected'));
@@ -4862,13 +4855,8 @@ function checkIdAvailability() {
     statusEl.className = 'custom-id-status';
     idCheckTimeout = setTimeout(() => {
         fbDb.collection('usernames').doc(raw).get().then((doc) => {
-            if (doc.exists) {
-                statusEl.innerText = 'این آیدی قبلاً استفاده شده است.';
-                statusEl.className = 'custom-id-status bad';
-            } else {
-                statusEl.innerText = 'این آیدی در دسترس است.';
-                statusEl.className = 'custom-id-status ok';
-            }
+            if (doc.exists) { statusEl.innerText = 'این آیدی قبلاً استفاده شده است.'; statusEl.className = 'custom-id-status bad'; }
+            else { statusEl.innerText = 'این آیدی در دسترس است.'; statusEl.className = 'custom-id-status ok'; }
         }).catch(() => { statusEl.innerText = ''; });
     }, 450);
 }
@@ -4882,16 +4870,21 @@ function saveCompeteProfile() {
     if (!rulesAccepted) return appAlert('برای ادامه باید قوانین رقابت را بپذیرید.');
 
     const isChangingId = !myProfile || myProfile.customId !== customId;
-
     const finishSave = () => {
-        const profileData = { customId, name, avatar: selectedAvatar, medals: (myProfile && myProfile.medals) || [] };
+        const profileData = {
+            customId, name, avatar: selectedAvatar,
+            medals: (myProfile && myProfile.medals) || [],
+            wins: (myProfile && myProfile.wins) || 0,
+            losses: (myProfile && myProfile.losses) || 0,
+            currentRoomId: (myProfile && myProfile.currentRoomId) || null
+        };
         fbDb.collection('users').doc(myUid).set(profileData, { merge: true }).then(() => {
             myProfile = profileData;
             cacheProfileLocally();
             updateCompeteIdSettingLabel();
             closeModal('profile-setup-modal');
             listenForMyInvites();
-            checkForActiveOrWaitingRoom();
+            resumeMyRoomIfAny();
             renderCompeteTab();
         }).catch((err) => appAlert('خطا در ذخیره پروفایل: ' + err.message));
     };
@@ -4920,6 +4913,13 @@ function renderCompeteHome() {
 function renderMedalShowcase() {
     const grid = document.getElementById('medal-showcase-grid');
     const empty = document.getElementById('medal-showcase-empty');
+    const statsEl = document.getElementById('medal-showcase-stats');
+    const wins = myProfile.wins || 0;
+    const losses = myProfile.losses || 0;
+    const total = wins + losses;
+    statsEl.innerText = total > 0
+        ? `${new Intl.NumberFormat('fa-IR').format(wins)} برد از ${new Intl.NumberFormat('fa-IR').format(total)} چالش`
+        : 'هنوز چالشی به پایان نرسیده است.';
     const medals = (myProfile.medals || []);
     if (medals.length === 0) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
@@ -4936,7 +4936,6 @@ function selectDuration(el, days) {
     document.querySelectorAll('.duration-option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
 }
-
 function generateRoomCode() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let code = '';
@@ -4948,18 +4947,15 @@ function generateRoomCode() {
 function createInviteLink() {
     const roomId = generateRoomCode();
     const roomData = {
-        roomId,
-        duration: selectedDuration,
-        status: 'waiting',
-        createdAt: Date.now(),
-        hostUid: myUid,
-        hostName: myProfile.name,
-        hostAvatar: myProfile.avatar,
-        hostCustomId: myProfile.customId,
-        guestUid: null,
-        scores: {}
+        roomId, duration: selectedDuration, status: 'waiting', createdAt: Date.now(),
+        hostUid: myUid, hostName: myProfile.name, hostAvatar: myProfile.avatar, hostCustomId: myProfile.customId,
+        guestUid: null, scores: {}
     };
     fbDb.collection('rooms').doc(roomId).set(roomData).then(() => {
+        return fbDb.collection('users').doc(myUid).update({ currentRoomId: roomId });
+    }).then(() => {
+        myProfile.currentRoomId = roomId;
+        cacheProfileLocally();
         showInviteLinkUI(roomId);
         watchRoomForGuestJoin(roomId);
     }).catch((err) => appAlert('خطا در ساخت چالش: ' + err.message));
@@ -4979,15 +4975,21 @@ function copyInviteLink() {
     appAlert('لینک کپی شد.');
 }
 
+function shareInviteLink() {
+    const url = document.getElementById('invite-link-value').value;
+    if (navigator.share) {
+        navigator.share({ title: 'دعوت به چالش رستا', text: 'به یک چالش پاکی دعوت شده‌اید:', url }).catch(() => {});
+    } else {
+        copyInviteLink();
+    }
+}
+
 function watchRoomForGuestJoin(roomId) {
     if (activeRoomUnsub) activeRoomUnsub();
     activeRoomUnsub = fbDb.collection('rooms').doc(roomId).onSnapshot((doc) => {
         const data = doc.data();
-        if (data && data.status === 'active') {
-            activeRoomUnsub();
-            activeRoomUnsub = null;
-            activateRoom(roomId);
-        }
+        if (!data) { activeRoomUnsub && activeRoomUnsub(); activeRoomUnsub = null; return; }
+        if (data.status === 'active') { activeRoomUnsub(); activeRoomUnsub = null; activateRoom(roomId); }
     });
 }
 
@@ -5002,28 +5004,30 @@ function tryJoinPendingRoom() {
     const roomId = pendingJoinRoomId;
     pendingJoinRoomId = null;
     fbDb.collection('rooms').doc(roomId).get().then((doc) => {
-        if (!doc.exists) return appAlert('این چالش پیدا نشد یا منقضی شده است.');
+        if (!doc.exists) return appAlert('این چالش پیدا نشد یا حذف شده است.');
         const data = doc.data();
         if (data.status === 'active' || data.status === 'finished') {
             if (data.hostUid === myUid || data.guestUid === myUid) { activateRoom(roomId); return; }
             return appAlert('این لینک چالش دیگر معتبر نیست.');
         }
         if (data.status !== 'waiting') return appAlert('این لینک چالش دیگر معتبر نیست.');
-        if (data.hostUid === myUid) { showInviteLinkUI(roomId); watchRoomForGuestJoin(roomId); showCompeteState('compete-home'); renderCompeteHome(); return; }
+        if (data.hostUid === myUid) {
+            showInviteLinkUI(roomId); watchRoomForGuestJoin(roomId);
+            showCompeteState('compete-home'); renderCompeteHome();
+            return;
+        }
         const now = Date.now();
         fbDb.collection('rooms').doc(roomId).update({
-            guestUid: myUid,
-            guestName: myProfile.name,
-            guestAvatar: myProfile.avatar,
-            guestCustomId: myProfile.customId,
-            status: 'active',
-            startedAt: now,
-            endsAt: now + data.duration * 86400000
-        }).then(() => activateRoom(roomId)).catch((err) => appAlert('خطا در پیوستن به چالش: ' + err.message));
-    }).catch((err) => {
-        console.log('tryJoinPendingRoom error:', err);
-        renderCompeteTab();
-    });
+            guestUid: myUid, guestName: myProfile.name, guestAvatar: myProfile.avatar, guestCustomId: myProfile.customId,
+            status: 'active', startedAt: now, endsAt: now + data.duration * 86400000
+        }).then(() => {
+            return fbDb.collection('users').doc(myUid).update({ currentRoomId: roomId });
+        }).then(() => {
+            myProfile.currentRoomId = roomId;
+            cacheProfileLocally();
+            activateRoom(roomId);
+        }).catch((err) => appAlert('خطا در پیوستن به چالش: ' + err.message));
+    }).catch((err) => { console.log('tryJoinPendingRoom error:', err); renderCompeteTab(); });
 }
 
 /* ---------------- Direct challenge by ID ---------------- */
@@ -5044,12 +5048,15 @@ function sendChallengeToId() {
             guestUid: null, scores: {}
         };
         fbDb.collection('rooms').doc(roomId).set(roomData).then(() => {
-            return fbDb.collection('invites').add({
-                toUid: targetUid, toCustomId: targetId,
+            return fbDb.collection('users').doc(myUid).update({ currentRoomId: roomId });
+        }).then(() => {
+            return fbDb.collection('users').doc(targetUid).collection('invites').add({
                 fromUid: myUid, fromName: myProfile.name, fromAvatar: myProfile.avatar,
                 duration: selectedDuration, roomId, status: 'pending', createdAt: Date.now()
             });
         }).then(() => {
+            myProfile.currentRoomId = roomId;
+            cacheProfileLocally();
             statusEl.innerText = 'درخواست ارسال شد.';
             statusEl.style.color = 'var(--accent-green)';
             document.getElementById('challenge-id-input').value = '';
@@ -5061,8 +5068,7 @@ function sendChallengeToId() {
 
 function listenForMyInvites() {
     if (myInvitesUnsub) myInvitesUnsub();
-    myInvitesUnsub = fbDb.collection('invites')
-        .where('toUid', '==', myUid)
+    myInvitesUnsub = fbDb.collection('users').doc(myUid).collection('invites')
         .where('status', '==', 'pending')
         .onSnapshot((snap) => {
             const wrapper = document.getElementById('compete-pending-invites-wrapper');
@@ -5089,38 +5095,76 @@ function acceptInvite(inviteId, roomId, duration) {
     fbDb.collection('rooms').doc(roomId).update({
         guestUid: myUid, guestName: myProfile.name, guestAvatar: myProfile.avatar, guestCustomId: myProfile.customId,
         status: 'active', startedAt: now, endsAt: now + parseInt(duration) * 86400000
-    }).then(() => {
-        fbDb.collection('invites').doc(inviteId).update({ status: 'accepted' });
-        activateRoom(roomId);
-    }).catch((err) => appAlert('خطا: ' + err.message));
+    }).then(() => fbDb.collection('users').doc(myUid).update({ currentRoomId: roomId }))
+      .then(() => fbDb.collection('users').doc(myUid).collection('invites').doc(inviteId).update({ status: 'accepted' }))
+      .then(() => { myProfile.currentRoomId = roomId; cacheProfileLocally(); activateRoom(roomId); })
+      .catch((err) => appAlert('خطا: ' + err.message));
 }
-
 function declineInvite(inviteId) {
-    fbDb.collection('invites').doc(inviteId).update({ status: 'declined' }).catch(() => {});
+    fbDb.collection('users').doc(myUid).collection('invites').doc(inviteId).update({ status: 'declined' }).catch(() => {});
 }
 
-/* ---------------- Active room / scoring ---------------- */
-function checkForActiveOrWaitingRoom() {
-    fbDb.collection('rooms').where('hostUid', '==', myUid).where('status', '==', 'active').limit(1).get().then((snap) => {
-        if (!snap.empty) { activateRoom(snap.docs[0].id); return; }
-        return fbDb.collection('rooms').where('guestUid', '==', myUid).where('status', '==', 'active').limit(1).get();
-    }).then((snap2) => {
-        if (!snap2) return; // already activated above
-        if (!snap2.empty) { activateRoom(snap2.docs[0].id); return; }
-        return fbDb.collection('rooms').where('hostUid', '==', myUid).where('status', '==', 'waiting').limit(1).get();
-    }).then((snap3) => {
-        if (!snap3) return; // already activated above
-        if (!snap3.empty) {
-            const roomId = snap3.docs[0].id;
+/* ---------------- Resume / cancel ---------------- */
+function resumeMyRoomIfAny() {
+    const roomId = myProfile && myProfile.currentRoomId;
+    if (!roomId) { renderCompeteTab(); return; }
+    fbDb.collection('rooms').doc(roomId).get().then((doc) => {
+        if (!doc.exists) { clearMyCurrentRoom(); renderCompeteTab(); return; }
+        const data = doc.data();
+        if (data.status === 'active') { activateRoom(roomId); return; }
+        if (data.status === 'waiting') {
             showInviteLinkUI(roomId);
             watchRoomForGuestJoin(roomId);
             renderCompeteTab();
             return;
         }
+        if (data.status === 'finished') { clearMyCurrentRoom(); renderCompeteTab(); return; }
         renderCompeteTab();
-    }).catch((err) => { console.log('checkForActiveOrWaitingRoom error:', err); renderCompeteTab(); });
+    }).catch((err) => { console.log('resumeMyRoomIfAny error:', err); renderCompeteTab(); });
 }
 
+function clearMyCurrentRoom() {
+    if (myProfile) myProfile.currentRoomId = null;
+    cacheProfileLocally();
+    if (myUid && fbDb) fbDb.collection('users').doc(myUid).update({ currentRoomId: null }).catch(() => {});
+}
+
+function cancelWaitingChallenge() {
+    const roomId = myProfile && myProfile.currentRoomId;
+    if (!roomId) return;
+    appConfirm('این چالش لغو شود؟ لینک دعوتی که فرستاده‌اید دیگر کار نخواهد کرد.', () => {
+        if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; }
+        fbDb.collection('rooms').doc(roomId).delete().finally(() => {
+            clearMyCurrentRoom();
+            document.getElementById('invite-link-result').style.display = 'none';
+            renderCompeteTab();
+        });
+    });
+}
+
+function cancelActiveChallenge() {
+    if (!activeRoomId) return;
+    appConfirm('از ترک این چالش مطمئن هستید؟ این رقابت برای هر دو نفر پایان می‌یابد و بدون برنده بسته می‌شود.', () => {
+        const roomId = activeRoomId;
+        fbDb.collection('rooms').doc(roomId).get().then((doc) => {
+            const d = doc.data();
+            const updates = { status: 'finished', finishedAt: Date.now(), winnerUid: null, cancelled: true };
+            if (d) {
+                updates.finalHostScore = (d.scores && d.scores[d.hostUid] && d.scores[d.hostUid].score) || 0;
+                updates.finalGuestScore = (d.scores && d.scores[d.guestUid] && d.scores[d.guestUid].score) || 0;
+            }
+            return fbDb.collection('rooms').doc(roomId).update(updates);
+        }).finally(() => {
+            if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; }
+            if (compScoreSyncInterval) { clearInterval(compScoreSyncInterval); compScoreSyncInterval = null; }
+            activeRoomId = null;
+            clearMyCurrentRoom();
+            renderCompeteTab();
+        });
+    });
+}
+
+/* ---------------- Scoring ---------------- */
 function computeBaselineDays() {
     if (!appData.isStarted) return 3;
     const events = [appData.installDate, ...appData.slips.map(s => s.date)].sort((a,b)=>a-b);
@@ -5131,8 +5175,7 @@ function computeBaselineDays() {
     return Math.max(1, avg);
 }
 
-// Days already clean right before the competition started (last slip
-// before compStartMs, or since the person started using the app at all).
+// Days already clean right before the competition started.
 function computePreCompStreakDays(compStartMs) {
     const priorSlips = appData.slips.filter(s => s.date < compStartMs);
     const lastEventBefore = priorSlips.length ? priorSlips[priorSlips.length - 1].date : appData.installDate;
@@ -5140,35 +5183,44 @@ function computePreCompStreakDays(compStartMs) {
     return Math.max(0, (compStartMs - lastEventBefore) / 86400000);
 }
 
-// Fair scoring: based on each player's OWN progress relative to their own
-// historical baseline (average clean streak before the competition),
-// not on raw streak length. The streak you're already carrying in when the
-// competition starts counts too (so day one isn't a hard reset for
-// everyone), but the bonus is always capped relative to YOUR OWN baseline,
-// so someone with a naturally long-standing streak doesn't automatically
-// dominate. A slip resets the in-competition streak and costs points, but
-// the penalty is softened if you'd already shown strong progress.
+// Fair, continuous (fractional-day) scoring: based on each player's OWN
+// progress relative to their own historical baseline, not raw streak
+// length, and it updates immediately rather than only once per full day.
+// The streak already carried in when the competition starts counts too
+// (so hour one isn't a hard reset for everyone), but the bonus rate is
+// always capped relative to YOUR OWN baseline. A slip resets the
+// in-competition streak and costs points, softened if you'd already shown
+// strong progress.
 function computeCompetitionScore(compStartMs, nowMs, baseline, preCompStreakDays) {
     const dayMs = 86400000;
-    const totalDays = Math.max(0, Math.floor((nowMs - compStartMs) / dayMs));
     const slipsInWindow = appData.slips.filter(s => s.date >= compStartMs && s.date <= nowMs).sort((a,b) => a.date - b.date);
-    let score = 0;
-    let currentStreakDays = Math.max(0, preCompStreakDays || 0);
-    for (let d = 0; d < totalDays; d++) {
-        const dayStart = compStartMs + d * dayMs;
-        const dayEnd = dayStart + dayMs;
-        const slipToday = slipsInWindow.find(s => s.date >= dayStart && s.date < dayEnd);
-        if (slipToday) {
-            const ratio = Math.min(currentStreakDays / baseline, 1);
-            score -= 20 * (1 - ratio * 0.3);
-            currentStreakDays = 0;
-        } else {
-            currentStreakDays++;
-            const ratio = Math.min(currentStreakDays / baseline, 3);
-            score += 10 + Math.round(ratio * 10);
-        }
+
+    function pointsForSpan(spanDays, startingStreakDays) {
+        if (spanDays <= 0) return 0;
+        const endStreak = startingStreakDays + spanDays;
+        const avgStreak = (startingStreakDays + endStreak) / 2;
+        const ratio = Math.min(avgStreak / baseline, 3);
+        return spanDays * (10 + ratio * 10);
     }
-    return { score: Math.max(0, Math.round(score)), currentStreakDays, totalDays };
+
+    let score = 0;
+    let cursorTime = compStartMs;
+    let runningStreak = Math.max(0, preCompStreakDays || 0);
+
+    for (const slip of slipsInWindow) {
+        const spanDays = Math.max(0, (slip.date - cursorTime) / dayMs);
+        score += pointsForSpan(spanDays, runningStreak);
+        const streakAtSlip = runningStreak + spanDays;
+        const penaltyRatio = Math.min(streakAtSlip / baseline, 1);
+        score -= 20 * (1 - penaltyRatio * 0.3);
+        cursorTime = slip.date;
+        runningStreak = 0;
+    }
+    const finalSpanDays = Math.max(0, (nowMs - cursorTime) / dayMs);
+    score += pointsForSpan(finalSpanDays, runningStreak);
+    const currentStreakDays = runningStreak + finalSpanDays;
+
+    return { score: Math.max(0, Math.round(score)), currentStreakDays, totalDays: Math.floor((nowMs - compStartMs) / dayMs) };
 }
 
 function activateRoom(roomId) {
@@ -5183,7 +5235,7 @@ function activateRoom(roomId) {
     }, (err) => console.log('room listener error:', err));
     syncMyCompetitionScore();
     if (compScoreSyncInterval) clearInterval(compScoreSyncInterval);
-    compScoreSyncInterval = setInterval(syncMyCompetitionScore, 60000);
+    compScoreSyncInterval = setInterval(syncMyCompetitionScore, 20000);
     showCompeteState('compete-active');
 }
 
@@ -5207,10 +5259,9 @@ function renderActiveVsBar(data) {
     const myAvatar = isHost ? data.hostAvatar : data.guestAvatar;
     const rivalName = isHost ? data.guestName : data.hostName;
     const rivalAvatar = isHost ? data.guestAvatar : data.hostAvatar;
-    const myUidKey = myUid;
     const rivalUidKey = isHost ? data.guestUid : data.hostUid;
-    const myScore = (data.scores && data.scores[myUidKey] && data.scores[myUidKey].score) || 0;
-    const rivalScore = (data.scores && data.scores[rivalUidKey] && data.scores[rivalUidKey].score) || 0;
+    const myScore = (data.scores && data.scores[myUid] && data.scores[myUid].score) || 0;
+    const rivalScore = (data.scores && rivalUidKey && data.scores[rivalUidKey] && data.scores[rivalUidKey].score) || 0;
     const maxScore = Math.max(myScore, rivalScore, 1);
     const myPct = Math.round((myScore/maxScore)*100);
     const rivalPct = Math.round((rivalScore/maxScore)*100);
@@ -5248,31 +5299,40 @@ function checkIfCompetitionEnded(data) {
             else if (guestScore > hostScore) winnerUid = d.guestUid;
             tx.update(ref, { status: 'finished', finishedAt: Date.now(), winnerUid, finalHostScore: hostScore, finalGuestScore: guestScore });
         });
-    }).then(() => {
-        awardMedalIfWon(activeRoomId);
-    }).catch((err) => console.log('finish transaction error:', err));
+    }).then(() => finalizeMyResult(activeRoomId)).catch((err) => console.log('finish transaction error:', err));
 }
 
-function awardMedalIfWon(roomId) {
+function finalizeMyResult(roomId) {
     fbDb.collection('rooms').doc(roomId).get().then((doc) => {
         const d = doc.data();
-        if (!d || d.winnerUid !== myUid) return;
-        const winnerScore = Math.max(d.finalHostScore, d.finalGuestScore);
-        const loserScore = Math.min(d.finalHostScore, d.finalGuestScore);
-        const diff = winnerScore - loserScore;
-        const base = Math.max(winnerScore, 1);
-        const pct = diff / base;
-        const tier = pct > 0.5 ? 'gold' : (pct > 0.2 ? 'silver' : 'bronze');
-        const medal = { tier, duration: d.duration, date: Date.now(), roomId };
-        fbDb.collection('users').doc(myUid).update({ medals: firebase.firestore.FieldValue.arrayUnion(medal) }).then(() => {
-            if (myProfile) { myProfile.medals = myProfile.medals || []; myProfile.medals.push(medal); cacheProfileLocally(); }
-        }).catch((err) => console.log('medal award error:', err));
-    }).catch((err) => console.log('awardMedalIfWon read error:', err));
+        if (!d) return;
+        const iWon = d.winnerUid === myUid;
+        const isDraw = !d.winnerUid;
+        const updates = {};
+        if (!isDraw) updates[iWon ? 'wins' : 'losses'] = firebase.firestore.FieldValue.increment(1);
+        if (iWon && !d.cancelled) {
+            const winnerScore = Math.max(d.finalHostScore, d.finalGuestScore);
+            const loserScore = Math.min(d.finalHostScore, d.finalGuestScore);
+            const diff = winnerScore - loserScore;
+            const base = Math.max(winnerScore, 1);
+            const pct = diff / base;
+            const tier = pct > 0.5 ? 'gold' : (pct > 0.2 ? 'silver' : 'bronze');
+            updates.medals = firebase.firestore.FieldValue.arrayUnion({ tier, duration: d.duration, date: Date.now(), roomId });
+        }
+        updates.currentRoomId = null;
+        fbDb.collection('users').doc(myUid).update(updates).then(() => {
+            if (!myProfile) return;
+            if (!isDraw) myProfile[iWon ? 'wins' : 'losses'] = (myProfile[iWon ? 'wins' : 'losses'] || 0) + 1;
+            myProfile.currentRoomId = null;
+            cacheProfileLocally();
+        }).catch((err) => console.log('finalizeMyResult update error:', err));
+    }).catch((err) => console.log('finalizeMyResult read error:', err));
 }
 
 function renderFinishedScreen(data) {
     if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; }
     if (compScoreSyncInterval) { clearInterval(compScoreSyncInterval); compScoreSyncInterval = null; }
+    finalizeMyResult(activeRoomId || data.roomId);
     const isHost = data.hostUid === myUid;
     const myName = isHost ? data.hostName : data.guestName;
     const myAvatar = isHost ? data.hostAvatar : data.guestAvatar;
@@ -5290,7 +5350,11 @@ function renderFinishedScreen(data) {
     document.getElementById('finish-rival-name').innerText = rivalName || '-';
     document.getElementById('finish-rival-score').innerText = rivalScore || 0;
 
-    if (isDraw) {
+    if (data.cancelled) {
+        document.getElementById('finish-result-icon').innerText = '🚩';
+        document.getElementById('finish-result-title').innerText = 'این چالش لغو شد';
+        document.getElementById('finish-result-sub').innerText = 'رقابت پیش از پایان توسط یکی از طرفین متوقف شد.';
+    } else if (isDraw) {
         document.getElementById('finish-result-icon').innerText = '🤝';
         document.getElementById('finish-result-title').innerText = 'رقابت مساوی شد';
         document.getElementById('finish-result-sub').innerText = 'هر دو نفر امتیاز برابر کسب کردید.';
@@ -5331,6 +5395,11 @@ function fireConfetti() {
 // Kick things off: check for an invite link in the URL, then init Firebase.
 checkUrlForRoomJoin();
 initCompeteFeature();
+if (pendingJoinRoomId) {
+    // Land the person directly on the competition tab when they open an
+    // invite link, instead of the home dashboard.
+    goToCompeteTab();
+}
 </script>
 <script>
 document.addEventListener('contextmenu', function(e) {
