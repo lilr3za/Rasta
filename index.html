@@ -1629,6 +1629,30 @@ padding: 14px 6px;
 .rival-profile-stat .val { font-size: 20px; font-weight: 900; color: var(--text-main); }
 .rival-profile-stat .label { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
 
+.rival-profile-medals-box {
+background: var(--input-bg);
+border-radius: 14px;
+padding: 14px;
+margin-top: 12px;
+text-align: right;
+}
+.rival-profile-medals-box h4 {
+font-size: 12px;
+color: var(--text-main);
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.rival-profile-medal-line {
+font-size: 12px;
+color: var(--text-muted);
+padding: 5px 0;
+border-bottom: 1px solid var(--border-color);
+}
+.rival-profile-medal-line:last-child { border-bottom: none; }
+.rival-profile-medal-line b { color: var(--text-main); }
+
 .custom-id-input-row {
 position: relative;
 margin-bottom: 8px;
@@ -1810,14 +1834,21 @@ overflow: hidden;
 .vs-bar-fill.rival { background: linear-gradient(90deg, #ff3b30, #ff6b6b); }
 .compete-countdown {
 text-align: center;
-background: var(--input-bg);
-border-radius: 14px;
-padding: 12px;
-margin-bottom: 14px;
+background: linear-gradient(145deg, rgba(42,101,240,0.08) 0%, var(--input-bg) 100%);
+border: 1px solid var(--border-color);
+border-radius: 16px;
+padding: 16px;
+margin-top: 22px;
+margin-bottom: 16px;
 font-size: 13px;
 color: var(--text-muted);
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 8px;
 }
-.compete-countdown b { color: var(--text-main); font-size: 16px; }
+.compete-countdown i { color: var(--accent-blue); font-size: 15px; }
+.compete-countdown b { color: var(--text-main); font-size: 19px; font-weight: 900; }
 
 /* Medal showcase */
 .medal-grid {
@@ -2361,6 +2392,7 @@ margin-bottom: 20px;
 <div class="tug-bar-divider" id="tug-bar-divider" style="right:50%;"></div>
 </div>
 <div class="compete-countdown">
+<i class="fa-solid fa-hourglass-half"></i>
 <b id="compete-days-left">-</b> روز تا پایان رقابت <span id="compete-duration-label"></span>
 </div>
 <p style="font-size:11px; color:var(--text-muted); text-align:center; line-height:1.8;">امتیاز بر اساس پیشرفت شخصی هر فرد نسبت به میانگین گذشته‌ خودش محاسبه می‌شود، نه صرفاً طول لغزش. هر روز که پاک بمانید امتیاز می‌گیرید و اگر بهتر از حد معمول خودتان عمل کنید، امتیاز بیشتری کسب می‌کنید.</p>
@@ -2399,10 +2431,14 @@ margin-bottom: 20px;
 <p id="rival-profile-id" style="color:var(--text-muted); font-size:12px; direction:ltr; margin-bottom:18px;"></p>
 <div class="rival-profile-stats">
 <div class="rival-profile-stat"><div class="val" id="rival-profile-days">-</div><div class="label">روز از شروع مسیر</div></div>
-<div class="rival-profile-stat"><div class="val" id="rival-profile-medals">-</div><div class="label">مدال</div></div>
 <div class="rival-profile-stat"><div class="val" id="rival-profile-wins">-</div><div class="label">برد</div></div>
 </div>
-<div class="btn-group" style="margin-top:20px;" id="rival-profile-actions"></div>
+<div class="rival-profile-medals-box">
+<h4><i class="fa-solid fa-medal" style="color:var(--accent-gold);"></i> مدال‌های دریافت‌شده</h4>
+<div id="rival-profile-medals-list"></div>
+<p id="rival-profile-medals-empty" class="data-warning" style="display:none;">هنوز مدالی کسب نشده است.</p>
+</div>
+<div class="btn-group" style="margin-top:16px;" id="rival-profile-actions"></div>
 <button class="btn btn-cancel" style="width:100%; margin-top:8px;" onclick="closeModal('rival-profile-modal')">بستن</button>
 </div>
 </div>
@@ -2550,7 +2586,7 @@ margin-bottom: 20px;
 <ul style="padding-right:18px; margin:0; font-size:11.5px; color:var(--text-muted); line-height:1.9;">
 <li>نام نمایشی، آواتار و آیدی اختصاصی شما</li>
 <li>امتیاز روزانه‌ شما در طول یک رقابت فعال (بر اساس پیشرفت شخصی شما نسبت به میانگین گذشته‌تان محاسبه می‌شود)</li>
-<li>تعداد روزهایی که در مسیر ترک عادت هستید، و تعداد برد/باخت و مدال‌های شما (روی پروفایل عمومی قابل مشاهده است)</li>
+<li>تعداد روزهایی که در مسیر ترک عادت هستید، تعداد برد/باخت، و تعداد دفعاتی که هر هدف (مثلاً ۳ یا ۷ روزه) را کسب کرده‌اید (روی پروفایل عمومی قابل مشاهده است)</li>
 </ul>
 <p style="font-size:11.5px; color:var(--text-muted); margin-top:8px; line-height:1.9;"><b style="color:var(--text-main);">هیچ‌گاه</b> جزئیات لغزش‌ها، دلایل آن‌ها، یا سایر داده‌های شخصی شما با کسی به اشتراک گذاشته نمی‌شود.</p>
 </div>
@@ -4801,7 +4837,7 @@ const firebaseConfig = {
 
 const AVATAR_SEEDS = ['Titan','Phoenix','Atlas','Blaze','Onyx','Storm','Falcon','Cobra','Raptor','Hunter','Ranger','Havoc'];
 function avatarUrl(seed) {
-    return `https://api.dicebear.com/7.x/bottts-neutral/svg?seed=${encodeURIComponent(seed || 'default')}&backgroundColor=1f2124,2b58d1,065f5b`;
+    return `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(seed || 'default')}&backgroundColor=0c0d0f,1f2124,052e2b,2b58d1`;
 }
 function profileAvatarSeed(profile) {
     return (profile && (profile.avatarSeed || profile.customId)) || 'default';
@@ -5130,13 +5166,25 @@ function renderCompeteHome() {
 }
 
 // "Days since journey start" is based on the person's own first-slip/
-// install date (appData.installDate) - kept up to date on their profile
-// so it can be shown to others on the profile popup.
+// install date (appData.installDate). Personal achievement medals (from
+// the Goals tab) are computed the same way. Both are kept up to date on
+// the user's own profile doc so they can be shown to others via the
+// profile popup - only these aggregate counts are shared, never raw
+// slip data.
+function computePersonalMedalsList() {
+    if (typeof predefinedGoals === 'undefined' || typeof getGoalStats !== 'function') return [];
+    const allGoals = [...predefinedGoals, ...(appData.customGoals || [])];
+    return allGoals.map(g => ({ days: g.days, count: getGoalStats(g.days).count }))
+        .filter(x => x.count > 0)
+        .sort((a,b) => a.days - b.days);
+}
+
 function syncJourneyStats() {
     if (!fbDb || !myUid) return;
     const days = appData.installDate ? Math.max(0, Math.floor((Date.now() - appData.installDate) / 86400000)) : 0;
-    if (myProfile) myProfile.journeyDays = days;
-    fbDb.collection('users').doc(myUid).update({ journeyDays: days }).catch(() => {});
+    const personalMedals = computePersonalMedalsList();
+    if (myProfile) { myProfile.journeyDays = days; myProfile.personalMedals = personalMedals; }
+    fbDb.collection('users').doc(myUid).update({ journeyDays: days, personalMedals }).catch(() => {});
 }
 
 function renderMedalShowcase() {
@@ -5164,19 +5212,17 @@ function renderMedalShowcase() {
 }
 
 // Personal habit-tracker achievements (from the Goals tab) shown
-// medal-style alongside competition medals. Uses predefinedGoals /
-// getGoalStats which are already defined earlier in the app's own script.
+// medal-style alongside competition medals, on the person's own showcase.
 function renderPersonalAchievementMedals() {
     const wrap = document.getElementById('personal-achv-wrapper');
     const grid = document.getElementById('personal-achv-grid');
-    if (!wrap || !grid || typeof predefinedGoals === 'undefined' || typeof getGoalStats !== 'function') return;
-    const allGoals = [...predefinedGoals, ...(appData.customGoals || [])];
-    const earned = allGoals.map(g => ({ goal: g, stats: getGoalStats(g.days) })).filter(x => x.stats.count > 0).sort((a,b) => a.goal.days - b.goal.days);
+    if (!wrap || !grid) return;
+    const earned = computePersonalMedalsList();
     if (earned.length === 0) { wrap.style.display = 'none'; return; }
     wrap.style.display = 'block';
-    grid.innerHTML = earned.map(({ goal, stats }) => {
-        const dayLabel = new Intl.NumberFormat('fa-IR').format(goal.days);
-        const countLabel = new Intl.NumberFormat('fa-IR').format(stats.count);
+    grid.innerHTML = earned.map(({ days, count }) => {
+        const dayLabel = new Intl.NumberFormat('fa-IR').format(days);
+        const countLabel = new Intl.NumberFormat('fa-IR').format(count);
         return `<div class="medal-card"><div class="medal-icon">🏅</div><div class="medal-name">${dayLabel} روزه</div><div class="medal-sub">${countLabel} بار</div></div>`;
     }).join('');
 }
@@ -5476,8 +5522,22 @@ function openProfileModalForUid(uid) {
         document.getElementById('rival-profile-name').innerText = p.name || '-';
         document.getElementById('rival-profile-id').innerText = '@' + (p.customId || '-');
         document.getElementById('rival-profile-days').innerText = new Intl.NumberFormat('fa-IR').format(p.journeyDays || 0);
-        document.getElementById('rival-profile-medals').innerText = new Intl.NumberFormat('fa-IR').format((p.medals || []).length);
         document.getElementById('rival-profile-wins').innerText = new Intl.NumberFormat('fa-IR').format(p.wins || 0);
+
+        const medalsList = document.getElementById('rival-profile-medals-list');
+        const medalsEmpty = document.getElementById('rival-profile-medals-empty');
+        const personalMedals = isMe ? computePersonalMedalsList() : (p.personalMedals || []);
+        if (personalMedals.length === 0) {
+            medalsList.innerHTML = ''; medalsEmpty.style.display = 'block';
+        } else {
+            medalsEmpty.style.display = 'none';
+            medalsList.innerHTML = personalMedals.map(m => {
+                const dayLabel = new Intl.NumberFormat('fa-IR').format(m.days);
+                const countLabel = new Intl.NumberFormat('fa-IR').format(m.count);
+                return `<div class="rival-profile-medal-line">🏅 <b>${countLabel} بار</b> ${dayLabel} روزه کسب شده</div>`;
+            }).join('');
+        }
+
         const actions = document.getElementById('rival-profile-actions');
         if (isMe) {
             actions.innerHTML = `<button class="btn btn-secondary" style="width:100%;" onclick="closeModal('rival-profile-modal'); openProfileSetup();"><i class="fa-solid fa-pen"></i> ویرایش پروفایل</button>`;
