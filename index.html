@@ -1486,16 +1486,16 @@ padding: 0;
 overflow: hidden;
 }
 .carousel-track {
-display: flex;
-direction: ltr;
-transition: transform 0.35s ease;
+position: relative;
 }
 .carousel-slide {
-min-width: 100%;
-flex-shrink: 0;
-direction: rtl;
+display: none;
 padding: 34px 26px 20px 26px;
 text-align: center;
+}
+.carousel-slide.active-slide {
+display: block;
+animation: fadeIn 0.25s ease;
 }
 .carousel-slide .carousel-icon {
 font-size: 46px;
@@ -2493,7 +2493,7 @@ margin-bottom: 20px;
 </div>
 <div class="settings-group">
 <div class="settings-item" style="flex-direction: column; align-items: stretch; gap: 10px;">
-<span>پاک‌سازی خودکار اطلاعات قدیمی
+<span>پاک‌سازی خودکار در صورت عدم فعالیت
 <i class="fa-regular fa-circle-question settings-info-icon" onclick="toggleSettingsInfo('autodelete-help-text', this)"></i>
 </span>
 <select id="auto-delete-select" class="timeframe-select" style="width:100%;" onchange="setAutoDeleteMonths()">
@@ -2505,7 +2505,7 @@ margin-bottom: 20px;
 </select>
 </div>
 <p class="settings-help-text" id="autodelete-help-text" style="display:none;">
-با انتخاب یک بازه زمانی، رکوردهای لغزش، محتوای تحریک‌کننده و احتلام که قدیمی‌تر از بازه انتخاب‌شده باشند، به صورت خودکار از برنامه حذف می‌شوند. برای غیرفعال کردن این قابلیت، گزینه «غیرفعال» را انتخاب کنید.
+با انتخاب یک بازه زمانی، اگر در تمام آن مدت هیچ لغزش، محتوای تحریک‌کننده یا احتلامی ثبت نکرده باشید (یعنی برنامه را استفاده نکرده‌اید)، تمام اطلاعات شما به‌طور کامل و خودکار پاک می‌شود — نه صرفاً رکوردهای قدیمی. اگر در این مدت فعالیتی ثبت کرده باشید، چیزی حذف نمی‌شود. برای غیرفعال کردن این قابلیت، گزینه «غیرفعال» را انتخاب کنید.
 </p>
 </div>
 <div class="settings-group">
@@ -2932,27 +2932,25 @@ if (appData.pin) { document.getElementById('lock-screen').style.display = 'flex'
 
 function applyAutoDeletePurge() {
 if (!appData.autoDeleteMonths || appData.autoDeleteMonths === 'off') return;
+if (!appData.isStarted) return;
 const months = parseInt(appData.autoDeleteMonths);
 if (!months) return;
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 const cutoff = new Date().getTime() - (months * 30 * MS_PER_DAY);
-let changed = false;
-if (appData.slips && appData.slips.length > 0) {
-const before = appData.slips.length;
-appData.slips = appData.slips.filter(s => s.date >= cutoff);
-if (appData.slips.length !== before) changed = true;
+
+const lastSlip = (appData.slips && appData.slips.length) ? appData.slips[appData.slips.length - 1].date : 0;
+const lastTrigger = (appData.triggers && appData.triggers.length) ? appData.triggers[appData.triggers.length - 1].date : 0;
+const lastWd = (appData.wetDreams && appData.wetDreams.length) ? appData.wetDreams[appData.wetDreams.length - 1] : 0;
+const lastActivity = Math.max(lastSlip, lastTrigger, lastWd, appData.installDate || 0);
+
+// Only wipe everything if there has been NO activity at all (no slip,
+// no trigger log, no wet-dream log) within the selected period - this is
+// an inactivity-based privacy wipe, not a routine trim of old records.
+if (lastActivity && lastActivity < cutoff) {
+localStorage.removeItem('ironWillData');
+localStorage.removeItem('rewire_compete_profile_v2');
+location.reload();
 }
-if (appData.triggers && appData.triggers.length > 0) {
-const before = appData.triggers.length;
-appData.triggers = appData.triggers.filter(t => t.date >= cutoff);
-if (appData.triggers.length !== before) changed = true;
-}
-if (appData.wetDreams && appData.wetDreams.length > 0) {
-const before = appData.wetDreams.length;
-appData.wetDreams = appData.wetDreams.filter(d => d >= cutoff);
-if (appData.wetDreams.length !== before) changed = true;
-}
-if (changed) localStorage.setItem('ironWillData', JSON.stringify(appData));
 }
 
 function applyTriggerFeatureVisibility() {
@@ -4837,7 +4835,7 @@ const firebaseConfig = {
 
 const AVATAR_SEEDS = ['Titan','Phoenix','Atlas','Blaze','Onyx','Storm','Falcon','Cobra','Raptor','Hunter','Ranger','Havoc'];
 function avatarUrl(seed) {
-    return `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(seed || 'default')}&backgroundColor=0c0d0f,1f2124,052e2b,2b58d1`;
+    return `https://api.dicebear.com/7.x/rings/svg?seed=${encodeURIComponent(seed || 'default')}&backgroundColor=0c0d0f,1f2124,052e2b`;
 }
 function profileAvatarSeed(profile) {
     return (profile && (profile.avatarSeed || profile.customId)) || 'default';
@@ -5017,11 +5015,16 @@ function loadMyProfile() {
 }
 
 /* ---------------- Onboarding carousel ---------------- */
+function showCarouselSlide(index) {
+    document.querySelectorAll('#carousel-track .carousel-slide').forEach((el, i) => {
+        el.classList.toggle('active-slide', i === index);
+    });
+    document.querySelectorAll('#carousel-dots span').forEach((d,i) => d.classList.toggle('active', i===index));
+}
 function openCompeteOnboarding(skipToProfile) {
     if (skipToProfile || localStorage.getItem(COMPETE_LS_ONBOARD_KEY)) { openProfileSetup(); return; }
     carouselIndex = 0;
-    document.getElementById('carousel-track').style.transform = 'translateX(0%)';
-    document.querySelectorAll('#carousel-dots span').forEach((d,i) => d.classList.toggle('active', i===0));
+    showCarouselSlide(0);
     document.getElementById('carousel-next-btn').innerText = 'بعدی';
     document.getElementById('carousel-modal').classList.add('active');
 }
@@ -5033,8 +5036,7 @@ function carouselNext() {
         openProfileSetup();
         return;
     }
-    document.getElementById('carousel-track').style.transform = `translateX(${carouselIndex * -100}%)`;
-    document.querySelectorAll('#carousel-dots span').forEach((d,i) => d.classList.toggle('active', i===carouselIndex));
+    showCarouselSlide(carouselIndex);
     if (carouselIndex === 2) document.getElementById('carousel-next-btn').innerText = 'شروع کنیم';
 }
 
