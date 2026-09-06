@@ -907,6 +907,17 @@ flex: 1;
 gap: 4px;
 transition: 0.3s;
 min-width: 0;
+position: relative;
+}
+.nav-badge-dot {
+position: absolute;
+top: -2px;
+right: calc(50% - 18px);
+width: 9px;
+height: 9px;
+border-radius: 50%;
+background: var(--accent-red);
+box-shadow: 0 0 0 2px var(--nav-bg);
 }
 .nav-item i {
 font-size: 20px;
@@ -1653,6 +1664,31 @@ border-bottom: 1px solid var(--border-color);
 .rival-profile-medal-line:last-child { border-bottom: none; }
 .rival-profile-medal-line b { color: var(--text-main); }
 
+.history-entry {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 4px;
+border-bottom: 1px solid var(--border-color);
+}
+.history-entry:last-child { border-bottom: none; }
+.history-entry img { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; }
+.history-entry-info { flex: 1; font-size: 12px; }
+.history-entry-info b { color: var(--text-main); display: block; margin-bottom: 2px; }
+.history-entry-score { font-size: 13px; font-weight: 900; direction: ltr; text-align: left; }
+.history-badge {
+font-size: 10px;
+font-weight: bold;
+padding: 3px 9px;
+border-radius: 8px;
+margin-top: 4px;
+display: inline-block;
+}
+.history-badge.win { background: rgba(52,199,89,0.15); color: var(--accent-green); }
+.history-badge.loss { background: rgba(255,59,48,0.15); color: var(--accent-red); }
+.history-badge.draw { background: rgba(255,215,0,0.15); color: var(--accent-gold); }
+.history-badge.cancelled { background: var(--input-bg); color: var(--text-muted); }
+
 .custom-id-input-row {
 position: relative;
 margin-bottom: 8px;
@@ -2369,6 +2405,13 @@ margin-bottom: 20px;
 </div>
 </div>
 
+<div class="settings-group">
+<div class="settings-item clickable" onclick="openChallengeHistory()">
+<span>تاریخچه چالش‌ها</span>
+<i class="fa-solid fa-clock-rotate-left action-icon"></i>
+</div>
+</div>
+
 </div>
 
 <div id="compete-active" class="compete-state">
@@ -2423,6 +2466,16 @@ margin-bottom: 20px;
 
 </div>
 
+<!-- Challenge History Modal -->
+<div class="modal-overlay" id="challenge-history-modal" style="z-index: 1006;">
+<div class="modal-content" style="max-width: 400px; text-align:right;">
+<h2 style="text-align:center; margin-bottom: 18px;">تاریخچه چالش‌ها</h2>
+<div id="challenge-history-list" style="max-height: 50vh; overflow-y:auto;"></div>
+<p id="challenge-history-empty" class="data-warning" style="display:none;">هنوز چالشی به پایان نرسیده است.</p>
+<button class="btn btn-cancel" style="width:100%; margin-top:14px;" onclick="closeModal('challenge-history-modal')">بستن</button>
+</div>
+</div>
+
 <!-- Rival / Friend Profile Popup -->
 <div class="modal-overlay" id="rival-profile-modal" style="z-index: 1006;">
 <div class="modal-content" style="max-width: 340px;">
@@ -2460,7 +2513,7 @@ margin-bottom: 20px;
 <div class="nav-item" onclick="switchTab('calendar', this)"><i class="fa-regular fa-calendar"></i><span>تقویم</span></div>
 <div class="nav-item" onclick="switchTab('goals', this)"><i class="fa-solid fa-bullseye"></i><span>اهداف</span></div>
 <div class="nav-item" onclick="switchTab('insights', this)"><i class="fa-solid fa-chart-bar"></i><span>آنالیز</span></div>
-<div class="nav-item" id="nav-item-compete" onclick="switchTab('compete', this)"><i class="fa-solid fa-crown"></i><span>رقابت</span></div>
+<div class="nav-item" id="nav-item-compete" onclick="switchTab('compete', this)"><i class="fa-solid fa-crown"></i><span id="compete-nav-badge" class="nav-badge-dot" style="display:none;"></span><span>رقابت</span></div>
 <div class="nav-item" onclick="switchTab('help-page', this)"><i class="fa-solid fa-circle-question"></i><span>راهنما</span></div>
 </nav>
 
@@ -2521,6 +2574,12 @@ margin-bottom: 20px;
 </div>
 </div>
 <div class="settings-group">
+<div class="settings-item clickable" onclick="requestNotificationPermission()">
+<span id="setting-notif-text">فعال‌سازی اعلان درخواست رقابت</span>
+<i class="fa-solid fa-bell action-icon"></i>
+</div>
+</div>
+<div class="settings-group">
 <div class="settings-item clickable" onclick="openExportModal()">
 <span>تهیه نسخه پشتیبان (Export)</span>
 <i class="fa-solid fa-download action-icon"></i>
@@ -2536,6 +2595,40 @@ margin-bottom: 20px;
 </div>
 </div>
 <button class="btn btn-cancel" style="width:100%; margin-top:10px;" onclick="closeModal('settings-modal')">بستن</button>
+</div>
+</div>
+
+<!-- General App Onboarding Carousel -->
+<div class="modal-overlay" id="app-intro-modal" style="z-index: 1007;">
+<div class="modal-content carousel-modal-content">
+<div class="carousel-track" id="app-intro-track">
+<div class="carousel-slide active-slide">
+<span class="carousel-icon">🌱</span>
+<h3>به رستا خوش آمدید</h3>
+<p>این برنامه به شما کمک می‌کند مسیر ترک یک عادت مخرب را روز به روز دنبال کنید، پیشرفت خود را ببینید و با پشتکار جلو بروید.</p>
+</div>
+<div class="carousel-slide">
+<span class="carousel-icon">📅</span>
+<h3>تقویم رنگی</h3>
+<p>روزهای پاک با رنگ سبز، روزهای لغزش با رنگ قرمز، و روزهای مواجهه با محتوای تحریک‌کننده (بدون لغزش) با رنگ زرد مشخص می‌شوند. با ضربه زدن روی هر روز می‌توانید اطلاعات آن را ثبت یا ویرایش کنید.</p>
+</div>
+<div class="carousel-slide">
+<span class="carousel-icon">🏅</span>
+<h3>اهداف و دستاوردها</h3>
+<p>با رسیدن به رکوردهای مشخص (مثلاً ۳، ۷ یا ۲۱ روز) مدال می‌گیرید. می‌توانید اهداف شخصی خودتان را هم تعریف کنید و پیشرفتتان را در بخش «آنالیز» با نمودار ببینید.</p>
+</div>
+<div class="carousel-slide">
+<span class="carousel-icon">🔒</span>
+<h3>اطلاعات شما نزد خودتان می‌ماند</h3>
+<p>تمام اطلاعات شما فقط روی همین دستگاه ذخیره می‌شود. بخش «رقابت» با دوستان کاملاً اختیاری است و در صورت استفاده، فقط امتیاز کلی و آمار خلاصه (نه جزئیات لغزش‌ها) به اشتراک گذاشته می‌شود.</p>
+</div>
+</div>
+<div class="carousel-dots" id="app-intro-dots">
+<span class="active" data-i="0"></span><span data-i="1"></span><span data-i="2"></span><span data-i="3"></span>
+</div>
+<div class="carousel-footer">
+<button class="btn btn-secondary" style="width:100%;" onclick="appIntroNext()" id="app-intro-next-btn">بعدی</button>
+</div>
 </div>
 </div>
 
@@ -2995,6 +3088,28 @@ document.getElementById('main-app-container').style.display = 'block';
 updateAllSections();
 initChartSwipes();
 renderHelpPage();
+if (!appData.isStarted && !localStorage.getItem('rewire_seenAppIntro')) openAppIntro();
+}
+
+let appIntroIndex = 0;
+function openAppIntro() {
+appIntroIndex = 0;
+document.querySelectorAll('#app-intro-track .carousel-slide').forEach((el, i) => el.classList.toggle('active-slide', i === 0));
+document.querySelectorAll('#app-intro-dots span').forEach((d, i) => d.classList.toggle('active', i === 0));
+document.getElementById('app-intro-next-btn').innerText = 'بعدی';
+document.getElementById('app-intro-modal').classList.add('active');
+}
+function appIntroNext() {
+appIntroIndex++;
+const slides = document.querySelectorAll('#app-intro-track .carousel-slide');
+if (appIntroIndex >= slides.length) {
+localStorage.setItem('rewire_seenAppIntro', '1');
+closeModal('app-intro-modal');
+return;
+}
+slides.forEach((el, i) => el.classList.toggle('active-slide', i === appIntroIndex));
+document.querySelectorAll('#app-intro-dots span').forEach((d, i) => d.classList.toggle('active', i === appIntroIndex));
+if (appIntroIndex === slides.length - 1) document.getElementById('app-intro-next-btn').innerText = 'شروع کنیم';
 }
 
 function lockAppManual() {
@@ -3044,6 +3159,31 @@ el.innerText = 'ویرایش آیدی رقابت (@' + myProfile.customId + ')';
 } else {
 el.innerText = 'تنظیم آیدی رقابت';
 }
+updateNotificationSettingLabel();
+}
+
+function updateNotificationSettingLabel() {
+const el = document.getElementById('setting-notif-text');
+if (!el) return;
+if (!('Notification' in window)) { el.innerText = 'اعلان در این مرورگر پشتیبانی نمی‌شود'; return; }
+if (Notification.permission === 'granted') el.innerText = 'اعلان درخواست رقابت فعال است ✓';
+else if (Notification.permission === 'denied') el.innerText = 'اعلان مسدود شده (از تنظیمات مرورگر تغییر دهید)';
+else el.innerText = 'فعال‌سازی اعلان درخواست رقابت';
+}
+
+function requestNotificationPermission() {
+if (!('Notification' in window)) return appAlert('مرورگر شما از اعلان پشتیبانی نمی‌کند.');
+if (Notification.permission === 'granted') { appAlert('اعلان درخواست رقابت از قبل فعال است.'); return; }
+if (Notification.permission === 'denied') {
+appAlert('اعلان برای این سایت مسدود شده است. برای فعال‌سازی باید از تنظیمات سایت در مرورگر خودتان اجازه اعلان را بدهید.');
+return;
+}
+appConfirm('با فعال‌سازی اعلان، وقتی دوستتان برایتان درخواست رقابت بفرستد، در همین دستگاه اعلان دریافت می‌کنید (تا وقتی برنامه در پس‌زمینه باز باشد). ادامه می‌دهید؟', () => {
+Notification.requestPermission().then((perm) => {
+updateNotificationSettingLabel();
+if (perm === 'granted') appAlert('اعلان درخواست رقابت فعال شد.');
+});
+});
 }
 
 function handlePinSettingsClick() {
@@ -4995,6 +5135,7 @@ function loadMyProfile() {
             if (!myProfile.medals) myProfile.medals = [];
             if (!myProfile.friends) myProfile.friends = [];
             if (!myProfile.blocked) myProfile.blocked = [];
+            if (!myProfile.history) myProfile.history = [];
             if (typeof myProfile.wins !== 'number') myProfile.wins = 0;
             if (typeof myProfile.losses !== 'number') myProfile.losses = 0;
             competeStatus = 'ready';
@@ -5432,11 +5573,24 @@ function sendChallengeToUid(targetUid, statusEl) {
 
 function listenForMyInvites() {
     if (myInvitesUnsub) myInvitesUnsub();
+    let knownInviteIds = new Set();
+    let firstSnapshot = true;
     myInvitesUnsub = fbDb.collection('users').doc(myUid).collection('invites')
         .where('status', '==', 'pending')
         .onSnapshot((snap) => {
             const wrapper = document.getElementById('compete-pending-invites-wrapper');
             const list = document.getElementById('compete-pending-invites-list');
+            const badge = document.getElementById('compete-nav-badge');
+            if (badge) badge.style.display = snap.empty ? 'none' : 'block';
+            if (!firstSnapshot) {
+                snap.docChanges().forEach((change) => {
+                    if (change.type === 'added' && !knownInviteIds.has(change.doc.id)) {
+                        notifyNewChallengeInvite(change.doc.data());
+                    }
+                });
+            }
+            knownInviteIds = new Set(snap.docs.map(d => d.id));
+            firstSnapshot = false;
             if (snap.empty) { wrapper.style.display = 'none'; list.innerHTML = ''; return; }
             wrapper.style.display = 'block';
             list.innerHTML = snap.docs.map(d => {
@@ -5452,6 +5606,21 @@ function listenForMyInvites() {
                 </div>`;
             }).join('');
         }, (err) => console.log('invites listener error:', err));
+}
+
+// Local (in-session) notification for a new challenge invite. Fires a real
+// OS notification if permission was granted; otherwise this is a no-op
+// beyond the nav badge dot, which always works with no setup at all.
+function notifyNewChallengeInvite(inv) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    try {
+        const n = new Notification('درخواست رقابت جدید', {
+            body: `${inv.fromName || 'یک دوست'} شما را به یک چالش دعوت کرده است.`,
+            icon: './icon-192.png',
+            tag: 'rewire-challenge-invite'
+        });
+        n.onclick = () => { window.focus(); goToCompeteTab(); n.close(); };
+    } catch (e) { console.log('notification error:', e); }
 }
 
 function acceptInvite(inviteId, roomId, duration) {
@@ -5748,14 +5917,23 @@ function checkIfCompetitionEnded(data) {
     }).then(() => finalizeMyResult(activeRoomId)).catch((err) => console.log('finish transaction error:', err));
 }
 
+let finalizedRoomIds = new Set();
 function finalizeMyResult(roomId) {
+    if (!roomId || finalizedRoomIds.has(roomId)) return;
+    finalizedRoomIds.add(roomId);
     fbDb.collection('rooms').doc(roomId).get().then((doc) => {
         const d = doc.data();
         if (!d) return;
+        const isHost = d.hostUid === myUid;
         const iWon = d.winnerUid === myUid;
         const isDraw = !d.winnerUid;
+        const myScore = isHost ? d.finalHostScore : d.finalGuestScore;
+        const rivalScore = isHost ? d.finalGuestScore : d.finalHostScore;
+        const rivalName = isHost ? d.guestName : d.hostName;
+        const rivalAvatarSeed = isHost ? d.guestAvatarSeed : d.hostAvatarSeed;
+
         const updates = {};
-        if (!isDraw) updates[iWon ? 'wins' : 'losses'] = firebase.firestore.FieldValue.increment(1);
+        if (!isDraw && !d.cancelled) updates[iWon ? 'wins' : 'losses'] = firebase.firestore.FieldValue.increment(1);
         if (iWon && !d.cancelled) {
             const winnerScore = Math.max(d.finalHostScore, d.finalGuestScore);
             const loserScore = Math.min(d.finalHostScore, d.finalGuestScore);
@@ -5765,14 +5943,56 @@ function finalizeMyResult(roomId) {
             const tier = pct > 0.5 ? 'gold' : (pct > 0.2 ? 'silver' : 'bronze');
             updates.medals = firebase.firestore.FieldValue.arrayUnion({ tier, duration: d.duration, date: Date.now(), roomId });
         }
+        const historyEntry = {
+            roomId, opponentName: rivalName || '-', opponentAvatarSeed: rivalAvatarSeed || 'default',
+            duration: d.duration, myScore: myScore || 0, rivalScore: rivalScore || 0,
+            result: d.cancelled ? 'cancelled' : (isDraw ? 'draw' : (iWon ? 'win' : 'loss')),
+            date: d.finishedAt || Date.now()
+        };
+        updates.history = firebase.firestore.FieldValue.arrayUnion(historyEntry);
         updates.currentRoomId = null;
         fbDb.collection('users').doc(myUid).update(updates).then(() => {
             if (!myProfile) return;
-            if (!isDraw) myProfile[iWon ? 'wins' : 'losses'] = (myProfile[iWon ? 'wins' : 'losses'] || 0) + 1;
+            if (!isDraw && !d.cancelled) myProfile[iWon ? 'wins' : 'losses'] = (myProfile[iWon ? 'wins' : 'losses'] || 0) + 1;
             myProfile.currentRoomId = null;
+            myProfile.history = myProfile.history || [];
+            myProfile.history.push(historyEntry);
             cacheProfileLocally();
         }).catch((err) => console.log('finalizeMyResult update error:', err));
     }).catch((err) => console.log('finalizeMyResult read error:', err));
+}
+
+function openChallengeHistory() {
+    const listEl = document.getElementById('challenge-history-list');
+    const emptyEl = document.getElementById('challenge-history-empty');
+    const history = (myProfile && myProfile.history) || [];
+    if (history.length === 0) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+    } else {
+        emptyEl.style.display = 'none';
+        const resultMeta = {
+            win: { label: 'برد', cls: 'win' },
+            loss: { label: 'باخت', cls: 'loss' },
+            draw: { label: 'مساوی', cls: 'draw' },
+            cancelled: { label: 'لغو شده', cls: 'cancelled' }
+        };
+        listEl.innerHTML = history.slice().reverse().map(h => {
+            const meta = resultMeta[h.result] || resultMeta.loss;
+            const durLabel = h.duration === 30 ? 'یک‌ماهه' : (new Intl.NumberFormat('fa-IR').format(h.duration) + ' روزه');
+            const dateLabel = new Date(h.date).toLocaleDateString('fa-IR');
+            return `<div class="history-entry">
+                <img src="${avatarUrl(h.opponentAvatarSeed)}">
+                <div class="history-entry-info">
+                    <b>${h.opponentName}</b>
+                    چالش ${durLabel} &middot; ${dateLabel}
+                    <div><span class="history-badge ${meta.cls}">${meta.label}</span></div>
+                </div>
+                <div class="history-entry-score">${h.myScore} - ${h.rivalScore}</div>
+            </div>`;
+        }).join('');
+    }
+    document.getElementById('challenge-history-modal').classList.add('active');
 }
 
 function renderFinishedScreen(data) {
