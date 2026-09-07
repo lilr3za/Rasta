@@ -1241,6 +1241,90 @@ border-radius: 20px;
 opacity: 1;
 pointer-events: all;
 }
+
+#global-loading-bar {
+position: absolute;
+top: 0; left: 0; right: 0;
+height: 3px;
+overflow: hidden;
+z-index: 60;
+opacity: 0;
+transition: opacity 0.2s ease;
+border-radius: 20px 20px 0 0;
+}
+#global-loading-bar.active { opacity: 1; }
+#global-loading-bar::after {
+content: '';
+position: absolute;
+top: 0; right: -40%;
+height: 100%;
+width: 40%;
+background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+animation: loadingBarSlide 1.1s infinite linear;
+}
+@keyframes loadingBarSlide {
+0% { right: -40%; }
+100% { right: 100%; }
+}
+
+.match-view-header {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-bottom: 16px;
+}
+.match-back-btn {
+width: 34px;
+height: 34px;
+border-radius: 10px;
+background: var(--input-bg);
+display: flex;
+align-items: center;
+justify-content: center;
+cursor: pointer;
+color: var(--text-muted);
+flex-shrink: 0;
+}
+#match-switcher {
+display: flex;
+gap: 8px;
+overflow-x: auto;
+flex: 1;
+}
+.match-pill {
+display: flex;
+align-items: center;
+gap: 6px;
+background: var(--input-bg);
+border: 2px solid transparent;
+border-radius: 20px;
+padding: 5px 10px 5px 5px;
+white-space: nowrap;
+cursor: pointer;
+font-size: 11px;
+color: var(--text-muted);
+flex-shrink: 0;
+}
+.match-pill img { width: 22px; height: 22px; border-radius: 50%; }
+.match-pill.active { border-color: var(--accent-blue); color: var(--text-main); font-weight: bold; }
+
+.my-room-banner-card {
+display: flex;
+align-items: center;
+gap: 12px;
+background: var(--bg-card);
+border: 1px solid var(--border-color);
+border-radius: 16px;
+padding: 12px 14px;
+margin-bottom: 10px;
+cursor: pointer;
+}
+.my-room-banner-card img { width: 40px; height: 40px; border-radius: 10px; }
+.my-room-banner-card .info { flex: 1; font-size: 12px; }
+.my-room-banner-card .info b { display: block; color: var(--text-main); font-size: 13px; margin-bottom: 2px; }
+.my-room-banner-card .info span { color: var(--text-muted); }
+.my-room-banner-card i { color: var(--text-muted); }
+
 @keyframes fadeIn {
 from {
 opacity: 0;
@@ -2312,6 +2396,8 @@ margin-bottom: 20px;
 <!-- Competition Section -->
 <div id="compete" class="section">
 
+<div id="global-loading-bar"></div>
+
 <div id="compete-transition-overlay">
 <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 28px; color: white;"></i>
 </div>
@@ -2342,6 +2428,11 @@ margin-bottom: 20px;
 
 <div id="compete-home" class="compete-state">
 
+<div id="my-rooms-banner-wrapper" style="display:none;">
+<h3 style="font-size: 14px; margin-bottom: 10px; color: var(--text-main);"><i class="fa-solid fa-swords" style="color:var(--accent-gold);"></i> چالش‌های باز شما</h3>
+<div id="my-rooms-banner-list"></div>
+</div>
+
 <div id="compete-pending-invites-wrapper" style="display:none;">
 <h3 style="font-size: 14px; margin-bottom: 10px; color: var(--text-main);"><i class="fa-solid fa-envelope" style="color:var(--accent-blue);"></i> درخواست‌های رقابت</h3>
 <div id="compete-pending-invites-list"></div>
@@ -2356,7 +2447,7 @@ margin-bottom: 20px;
 </div>
 </div>
 <h3 style="font-size: 15px; margin-bottom: 4px;">ساخت چالش جدید</h3>
-<p style="font-size:11px; color:var(--text-muted); margin-bottom:14px;">مدت رقابت را انتخاب کنید:</p>
+<p style="font-size:11px; color:var(--text-muted); margin-bottom:14px;">می‌توانید تا ۳ چالش هم‌زمان باز داشته باشید. مدت این چالش را انتخاب کنید:</p>
 <div class="duration-toggle">
 <div class="duration-option selected" data-duration="14" onclick="selectDuration(this,14)">
 <div class="lbl-main">چالش کوتاه</div>
@@ -2368,15 +2459,6 @@ margin-bottom: 20px;
 </div>
 </div>
 <button class="btn btn-secondary" style="width:100%; margin-bottom: 6px;" onclick="createInviteLink()" id="create-link-btn"><i class="fa-solid fa-link"></i> ساخت لینک دعوت</button>
-<div id="invite-link-result" style="display:none; margin-top: 12px; text-align:right;">
-<div class="invite-link-box">
-<input type="text" id="invite-link-value" readonly>
-<button class="reset-btn" onclick="shareInviteLink()" title="اشتراک‌گذاری"><i class="fa-solid fa-share-nodes"></i></button>
-<button class="reset-btn" onclick="copyInviteLink()" title="کپی"><i class="fa-solid fa-copy"></i></button>
-</div>
-<p style="font-size:11px; color:var(--text-muted); margin-bottom:10px;">این لینک را برای دوست خود ارسال کنید. با ورود او به لینک، رقابت شروع می‌شود.</p>
-<button class="btn-delete" style="margin-top:0;" onclick="cancelWaitingChallenge()"><i class="fa-solid fa-ban"></i> لغو این چالش</button>
-</div>
 
 <div class="compete-divider">یا</div>
 
@@ -2416,6 +2498,24 @@ margin-bottom: 20px;
 
 <div id="compete-active" class="compete-state">
 <div class="card">
+<div class="match-view-header">
+<div class="match-back-btn" onclick="goToCompeteHome()"><i class="fa-solid fa-arrow-right"></i></div>
+<div id="match-switcher" style="display:none;"></div>
+</div>
+
+<div id="match-waiting-view" style="display:none; text-align:center;">
+<i class="fa-solid fa-hourglass-half" style="font-size: 34px; color: var(--accent-blue); margin-bottom: 14px;"></i>
+<h3 style="font-size: 15px; margin-bottom: 6px;">در انتظار پیوستن دوستتان</h3>
+<p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">این لینک را برای دوست خود ارسال کنید. با ورود او، رقابت شروع می‌شود.</p>
+<div class="invite-link-box">
+<input type="text" id="match-invite-link-value" readonly>
+<button class="reset-btn" onclick="shareInviteLink()" title="اشتراک‌گذاری"><i class="fa-solid fa-share-nodes"></i></button>
+<button class="reset-btn" onclick="copyInviteLink()" title="کپی"><i class="fa-solid fa-copy"></i></button>
+</div>
+<button class="btn-delete" style="margin-top:10px;" onclick="cancelWaitingChallenge()"><i class="fa-solid fa-ban"></i> لغو این چالش</button>
+</div>
+
+<div id="match-active-view" style="display:none;">
 <div class="vs-header">
 <div class="vs-player me" onclick="openProfileModalForUid(myUid)" style="cursor:pointer;">
 <img class="vs-player-avatar-img" id="vs-my-avatar">
@@ -2442,9 +2542,11 @@ margin-bottom: 20px;
 <button class="undo-btn" style="width:100%; text-align:center; margin-top:16px;" onclick="cancelActiveChallenge()"><i class="fa-solid fa-flag"></i> ترک این چالش</button>
 </div>
 </div>
+</div>
 
-<div id="compete-finished" class="compete-state">
-<div class="card" style="text-align:center;">
+<!-- Match Finished Modal -->
+<div class="modal-overlay" id="match-finished-modal" style="z-index: 1006;">
+<div class="modal-content" style="text-align:center;">
 <div class="win-result-icon" id="finish-result-icon">🏆</div>
 <div class="win-result-title" id="finish-result-title"></div>
 <div class="win-result-sub" id="finish-result-sub"></div>
@@ -2460,10 +2562,8 @@ margin-bottom: 20px;
 <div style="font-size:18px; font-weight:900; color:var(--accent-red);" id="finish-rival-score"></div>
 </div>
 </div>
-<button class="btn btn-secondary" style="width:100%;" onclick="leaveFinishedCompetition()">شروع چالش جدید</button>
+<button class="btn btn-secondary" style="width:100%;" onclick="closeFinishedMatch()">متوجه شدم</button>
 </div>
-</div>
-
 </div>
 
 <!-- Challenge History Modal -->
@@ -2494,6 +2594,8 @@ margin-bottom: 20px;
 <div class="btn-group" style="margin-top:16px;" id="rival-profile-actions"></div>
 <button class="btn btn-cancel" style="width:100%; margin-top:8px;" onclick="closeModal('rival-profile-modal')">بستن</button>
 </div>
+</div>
+
 </div>
 
 <!-- New Help Page Section -->
@@ -4955,14 +5057,16 @@ initApp();
 <script>
 /* =========================================================================
    COMPETITION FEATURE (Firebase Firestore + Anonymous Auth)
+   Supports up to 3 concurrent open challenges (waiting or active) per user.
    -------------------------------------------------------------------------
    Data model (kept index-free on purpose):
      users/{uid}            -> { customId, name, avatarSeed, medals[],
-                                  wins, losses, currentRoomId, createdAt,
-                                  friends[] (uids), blocked[] (uids) }
+                                  wins, losses, history[], friends[],
+                                  blocked[], activeRoomIds[] (max 3),
+                                  journeyDays, personalMedals[] }
      users/{uid}/invites/*  -> pending challenge invites addressed to uid
      usernames/{customId}   -> { uid }   (id -> uid lookup; freed on rename)
-     rooms/{roomId}         -> the competition itself
+     rooms/{roomId}         -> a single competition (status: waiting/active/finished)
    ========================================================================= */
 const firebaseConfig = {
   apiKey: "AIzaSyBEfdK3412qL9ZewBSFoAQWGWSqWzaXcOs",
@@ -4973,6 +5077,7 @@ const firebaseConfig = {
   appId: "1:443105489416:web:7ec803e74379d48f12d7bd"
 };
 
+const MAX_CONCURRENT_ROOMS = 3;
 const AVATAR_SEEDS = ['Titan','Phoenix','Atlas','Blaze','Onyx','Storm','Falcon','Cobra','Raptor','Hunter','Ranger','Havoc'];
 function avatarUrl(seed) {
     return `https://api.dicebear.com/7.x/rings/svg?seed=${encodeURIComponent(seed || 'default')}&backgroundColor=0c0d0f,1f2124,052e2b`;
@@ -4989,8 +5094,10 @@ let myUid = null;
 let myProfile = null;
 let selectedAvatarSeed = AVATAR_SEEDS[0];
 let selectedDuration = 14;
-let activeRoomId = null;
-let activeRoomUnsub = null;
+let myRooms = {};          // roomId -> { data, unsub }
+let focusedRoomId = null;
+let currentFinishedRoomId = null;
+let finalizedRoomIds = new Set();
 let myInvitesUnsub = null;
 let compScoreSyncInterval = null;
 let carouselIndex = 0;
@@ -4999,6 +5106,21 @@ let competeAuthReady = false;
 let competeStatus = 'idle'; // idle -> loading -> ready
 let competeLoadingTimeout = null;
 let currentViewedProfileUid = null;
+
+/* ---------------- Global loading indicator ---------------- */
+let pendingOpsCount = 0;
+function beginLoadingIndicator() {
+    pendingOpsCount++;
+    const bar = document.getElementById('global-loading-bar');
+    if (bar) bar.classList.add('active');
+}
+function endLoadingIndicator() {
+    pendingOpsCount = Math.max(0, pendingOpsCount - 1);
+    if (pendingOpsCount === 0) {
+        const bar = document.getElementById('global-loading-bar');
+        if (bar) bar.classList.remove('active');
+    }
+}
 
 /* ---------------- Local cache (instant restore, no flash / re-prompt) ---------------- */
 function cacheProfileLocally() {
@@ -5013,9 +5135,6 @@ function readCachedProfile() {
     } catch (e) { return null; }
 }
 
-// Trust the local cache immediately (before Firebase even responds) so the
-// competition tab never shows onboarding/loading for a returning user.
-// It's reconciled with the real authenticated uid the moment auth resolves.
 (function instantRestore() {
     const cached = readCachedProfile();
     if (cached && cached.profile) {
@@ -5070,11 +5189,8 @@ function ensureReady(callback, onFail) {
 function onAuthReady() {
     const cached = readCachedProfile();
     if (cached && cached.uid === myUid && cached.profile) {
-        // Cache matches the real session - nothing to correct.
         myProfile = cached.profile;
     } else if (myProfile && cached && cached.uid !== myUid) {
-        // We optimistically showed a cached profile that turned out to
-        // belong to a different session; drop it and re-fetch for real.
         myProfile = null;
         competeStatus = 'idle';
         if (document.getElementById('compete').classList.contains('active')) showCompeteState('compete-loading');
@@ -5092,9 +5208,9 @@ window.addEventListener('offline', () => {
     if (document.getElementById('compete').classList.contains('active')) showCompeteState('compete-offline');
 });
 document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && activeRoomId) syncMyCompetitionScore();
+    if (document.visibilityState === 'visible') syncAllActiveScores();
 });
-window.addEventListener('focus', () => { if (activeRoomId) syncMyCompetitionScore(); });
+window.addEventListener('focus', () => syncAllActiveScores());
 
 function showCompeteState(stateId) {
     document.querySelectorAll('.compete-state').forEach(el => el.classList.remove('active'));
@@ -5118,7 +5234,16 @@ function renderCompeteTab() {
         return;
     }
     if (!myProfile) { showCompeteState('compete-needs-profile'); return; }
-    if (activeRoomId) { showCompeteState('compete-active'); return; }
+    // Priority goes to an open match: the first time you open the
+    // competition tab (per app-session) with any waiting/active room,
+    // that match view is shown directly instead of the home screen.
+    const ids = Object.keys(myRooms);
+    if (ids.length > 0) {
+        if (!focusedRoomId || !myRooms[focusedRoomId]) focusedRoomId = ids[0];
+        showCompeteState('compete-active');
+        renderRoomsUI();
+        return;
+    }
     showCompeteState('compete-home');
     renderCompeteHome();
 }
@@ -5126,6 +5251,14 @@ function renderCompeteTab() {
 function goToCompeteTab() {
     const navEl = document.getElementById('nav-item-compete');
     if (navEl) switchTab('compete', navEl);
+}
+
+// "Back" button inside an open match: lets you check friends/history/medals
+// without leaving your open challenge(s) - they keep syncing in the
+// background regardless of which screen is currently shown.
+function goToCompeteHome() {
+    showCompeteState('compete-home');
+    renderCompeteHome();
 }
 
 function loadMyProfile() {
@@ -5136,14 +5269,16 @@ function loadMyProfile() {
             if (!myProfile.friends) myProfile.friends = [];
             if (!myProfile.blocked) myProfile.blocked = [];
             if (!myProfile.history) myProfile.history = [];
+            if (!myProfile.activeRoomIds) myProfile.activeRoomIds = [];
             if (typeof myProfile.wins !== 'number') myProfile.wins = 0;
             if (typeof myProfile.losses !== 'number') myProfile.losses = 0;
             competeStatus = 'ready';
             cacheProfileLocally();
             updateCompeteIdSettingLabel();
             listenForMyInvites();
+            startScoreSyncLoop();
             if (pendingJoinRoomId) tryJoinPendingRoom();
-            else resumeMyRoomIfAny();
+            else resumeMyActiveRooms();
         } else {
             myProfile = null;
             competeStatus = 'ready';
@@ -5156,29 +5291,26 @@ function loadMyProfile() {
 }
 
 /* ---------------- Onboarding carousel ---------------- */
-function showCarouselSlide(index) {
-    document.querySelectorAll('#carousel-track .carousel-slide').forEach((el, i) => {
-        el.classList.toggle('active-slide', i === index);
-    });
-    document.querySelectorAll('#carousel-dots span').forEach((d,i) => d.classList.toggle('active', i===index));
-}
 function openCompeteOnboarding(skipToProfile) {
     if (skipToProfile || localStorage.getItem(COMPETE_LS_ONBOARD_KEY)) { openProfileSetup(); return; }
     carouselIndex = 0;
-    showCarouselSlide(0);
+    document.querySelectorAll('#carousel-track .carousel-slide').forEach((el, i) => el.classList.toggle('active-slide', i === 0));
+    document.querySelectorAll('#carousel-dots span').forEach((d,i) => d.classList.toggle('active', i===0));
     document.getElementById('carousel-next-btn').innerText = 'بعدی';
     document.getElementById('carousel-modal').classList.add('active');
 }
 function carouselNext() {
     carouselIndex++;
-    if (carouselIndex >= 3) {
+    const slides = document.querySelectorAll('#carousel-track .carousel-slide');
+    if (carouselIndex >= slides.length) {
         localStorage.setItem(COMPETE_LS_ONBOARD_KEY, '1');
         closeModal('carousel-modal');
         openProfileSetup();
         return;
     }
-    showCarouselSlide(carouselIndex);
-    if (carouselIndex === 2) document.getElementById('carousel-next-btn').innerText = 'شروع کنیم';
+    slides.forEach((el, i) => el.classList.toggle('active-slide', i === carouselIndex));
+    document.querySelectorAll('#carousel-dots span').forEach((d,i) => d.classList.toggle('active', i===carouselIndex));
+    if (carouselIndex === slides.length - 1) document.getElementById('carousel-next-btn').innerText = 'شروع کنیم';
 }
 
 /* ---------------- Profile setup ---------------- */
@@ -5223,26 +5355,14 @@ function checkIdAvailability() {
     statusEl.innerText = 'در حال بررسی...';
     statusEl.className = 'custom-id-status';
     idCheckTimeout = setTimeout(() => {
+        beginLoadingIndicator();
         ensureReady(() => {
             fbDb.collection('usernames').doc(raw).get().then((doc) => {
                 if (doc.exists) { statusEl.innerText = 'این آیدی قبلاً استفاده شده است.'; statusEl.className = 'custom-id-status bad'; }
                 else { statusEl.innerText = 'این آیدی در دسترس است.'; statusEl.className = 'custom-id-status ok'; }
-            }).catch(() => { statusEl.innerText = ''; });
-        }, () => { statusEl.innerText = ''; });
+            }).catch(() => { statusEl.innerText = ''; }).finally(endLoadingIndicator);
+        }, () => { statusEl.innerText = ''; endLoadingIndicator(); });
     }, 450);
-}
-
-function syncNameAvatarToCurrentRoom(profileData) {
-    const roomId = profileData.currentRoomId;
-    if (!roomId || !fbDb) return;
-    fbDb.collection('rooms').doc(roomId).get().then((doc) => {
-        const r = doc.data();
-        if (!r) return;
-        const updates = {};
-        if (r.hostUid === myUid) { updates.hostName = profileData.name; updates.hostAvatarSeed = profileData.avatarSeed; }
-        else if (r.guestUid === myUid) { updates.guestName = profileData.name; updates.guestAvatarSeed = profileData.avatarSeed; }
-        if (Object.keys(updates).length) fbDb.collection('rooms').doc(roomId).update(updates).catch(() => {});
-    }).catch(() => {});
 }
 
 function saveCompeteProfile() {
@@ -5255,6 +5375,7 @@ function saveCompeteProfile() {
 
     const btn = document.getElementById('profile-save-btn');
     btn.disabled = true; btn.innerText = 'در حال ذخیره...';
+    beginLoadingIndicator();
 
     ensureReady(() => {
         const isChangingId = !myProfile || myProfile.customId !== customId;
@@ -5266,7 +5387,8 @@ function saveCompeteProfile() {
                 losses: (myProfile && myProfile.losses) || 0,
                 friends: (myProfile && myProfile.friends) || [],
                 blocked: (myProfile && myProfile.blocked) || [],
-                currentRoomId: (myProfile && myProfile.currentRoomId) || null,
+                history: (myProfile && myProfile.history) || [],
+                activeRoomIds: (myProfile && myProfile.activeRoomIds) || [],
                 createdAt: (myProfile && myProfile.createdAt) || Date.now()
             };
             fbDb.collection('users').doc(myUid).set(profileData, { merge: true }).then(() => {
@@ -5274,28 +5396,37 @@ function saveCompeteProfile() {
                 competeStatus = 'ready';
                 cacheProfileLocally();
                 updateCompeteIdSettingLabel();
-                syncNameAvatarToCurrentRoom(profileData);
+                syncNameAvatarToAllRooms(profileData);
                 closeModal('profile-setup-modal');
                 listenForMyInvites();
-                resumeMyRoomIfAny();
                 renderCompeteTab();
             }).catch((err) => appAlert('خطا در ذخیره پروفایل: ' + err.message))
-              .finally(() => { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; });
+              .finally(() => { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; endLoadingIndicator(); });
         };
 
         if (isChangingId) {
             fbDb.collection('usernames').doc(customId).get().then((doc) => {
-                if (doc.exists) { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; return appAlert('این آیدی قبلاً استفاده شده است، لطفاً آیدی دیگری انتخاب کنید.'); }
+                if (doc.exists) { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; endLoadingIndicator(); return appAlert('این آیدی قبلاً استفاده شده است، لطفاً آیدی دیگری انتخاب کنید.'); }
                 const batch = fbDb.batch();
-                // Freeing the previous id so someone else can use it.
                 if (myProfile && myProfile.customId) batch.delete(fbDb.collection('usernames').doc(myProfile.customId));
                 batch.set(fbDb.collection('usernames').doc(customId), { uid: myUid });
-                batch.commit().then(finishSave).catch((err) => { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; appAlert('خطا: ' + err.message); });
-            }).catch((err) => { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; appAlert('خطا در بررسی آیدی: ' + err.message); });
+                batch.commit().then(finishSave).catch((err) => { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; endLoadingIndicator(); appAlert('خطا: ' + err.message); });
+            }).catch((err) => { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; endLoadingIndicator(); appAlert('خطا در بررسی آیدی: ' + err.message); });
         } else {
             finishSave();
         }
-    }, () => { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; appAlert('اتصال برقرار نشد، دوباره تلاش کنید.'); });
+    }, () => { btn.disabled = false; btn.innerText = 'ذخیره و ادامه'; endLoadingIndicator(); appAlert('اتصال برقرار نشد، دوباره تلاش کنید.'); });
+}
+
+function syncNameAvatarToAllRooms(profileData) {
+    Object.keys(myRooms).forEach((roomId) => {
+        const r = myRooms[roomId].data;
+        if (!r) return;
+        const updates = {};
+        if (r.hostUid === myUid) { updates.hostName = profileData.name; updates.hostAvatarSeed = profileData.avatarSeed; }
+        else if (r.guestUid === myUid) { updates.guestName = profileData.name; updates.guestAvatarSeed = profileData.avatarSeed; }
+        if (Object.keys(updates).length && fbDb) fbDb.collection('rooms').doc(roomId).update(updates).catch(() => {});
+    });
 }
 
 /* ---------------- Compete home render ---------------- */
@@ -5305,15 +5436,10 @@ function renderCompeteHome() {
     document.getElementById('my-id-display').innerText = '@' + myProfile.customId;
     renderMedalShowcase();
     renderFriendsList();
+    renderMyRoomsBanner();
     syncJourneyStats();
 }
 
-// "Days since journey start" is based on the person's own first-slip/
-// install date (appData.installDate). Personal achievement medals (from
-// the Goals tab) are computed the same way. Both are kept up to date on
-// the user's own profile doc so they can be shown to others via the
-// profile popup - only these aggregate counts are shared, never raw
-// slip data.
 function computePersonalMedalsList() {
     if (typeof predefinedGoals === 'undefined' || typeof getGoalStats !== 'function') return [];
     const allGoals = [...predefinedGoals, ...(appData.customGoals || [])];
@@ -5354,8 +5480,6 @@ function renderMedalShowcase() {
     renderPersonalAchievementMedals();
 }
 
-// Personal habit-tracker achievements (from the Goals tab) shown
-// medal-style alongside competition medals, on the person's own showcase.
 function renderPersonalAchievementMedals() {
     const wrap = document.getElementById('personal-achv-wrapper');
     const grid = document.getElementById('personal-achv-grid');
@@ -5376,7 +5500,6 @@ function renderFriendsList() {
     const friends = myProfile.friends || [];
     if (friends.length === 0) { container.innerHTML = ''; empty.style.display = 'block'; return; }
     empty.style.display = 'none';
-    container.innerHTML = friends.map(() => '').join(''); // clear while loading
     Promise.all(friends.map(uid => fbDb.collection('users').doc(uid).get().catch(() => null))).then((docs) => {
         container.innerHTML = docs.filter(d => d && d.exists).map(d => {
             const f = d.data();
@@ -5393,6 +5516,29 @@ function renderFriendsList() {
     });
 }
 
+// Quick-access list of all currently open (waiting or active) challenges,
+// shown on the home screen so you can jump into any of them.
+function renderMyRoomsBanner() {
+    const wrapper = document.getElementById('my-rooms-banner-wrapper');
+    const list = document.getElementById('my-rooms-banner-list');
+    const ids = Object.keys(myRooms);
+    if (ids.length === 0) { wrapper.style.display = 'none'; return; }
+    wrapper.style.display = 'block';
+    list.innerHTML = ids.map(id => {
+        const r = myRooms[id].data;
+        if (!r) return '';
+        const isHost = r.hostUid === myUid;
+        const rivalName = isHost ? r.guestName : r.hostName;
+        const rivalSeed = isHost ? r.guestAvatarSeed : r.hostAvatarSeed;
+        const statusLabel = r.status === 'waiting' ? 'در انتظار پیوستن' : 'در حال رقابت';
+        return `<div class="my-room-banner-card" onclick="focusRoom('${id}')">
+            <img src="${avatarUrl(rivalSeed || 'default')}">
+            <div class="info"><b>${rivalName || 'دعوت باز'}</b><span>${statusLabel}</span></div>
+            <i class="fa-solid fa-chevron-left"></i>
+        </div>`;
+    }).join('');
+}
+
 function selectDuration(el, days) {
     selectedDuration = days;
     document.querySelectorAll('.duration-option').forEach(o => o.classList.remove('selected'));
@@ -5404,11 +5550,97 @@ function generateRoomCode() {
     for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
     return code;
 }
+function roomSlotsFull() { return Object.keys(myRooms).length >= MAX_CONCURRENT_ROOMS; }
+
+/* ---------------- Room tracking (multi-room core) ---------------- */
+function trackRoom(roomId) {
+    if (myRooms[roomId]) return;
+    myRooms[roomId] = { data: null, unsub: null };
+    beginLoadingIndicator();
+    let firstLoad = true;
+    const unsub = fbDb.collection('rooms').doc(roomId).onSnapshot((doc) => {
+        if (firstLoad) { endLoadingIndicator(); firstLoad = false; }
+        const data = doc.data();
+        if (!data) { untrackRoom(roomId); return; }
+        if (!myRooms[roomId]) return; // already untracked meanwhile
+        myRooms[roomId].data = data;
+        if (data.status === 'finished') { showMatchFinished(roomId, data); return; }
+        renderRoomsUI();
+    }, (err) => {
+        if (firstLoad) { endLoadingIndicator(); firstLoad = false; }
+        console.log('room listener error:', roomId, err);
+    });
+    myRooms[roomId].unsub = unsub;
+}
+
+function untrackRoom(roomId) {
+    if (myRooms[roomId] && myRooms[roomId].unsub) myRooms[roomId].unsub();
+    delete myRooms[roomId];
+    if (focusedRoomId === roomId) {
+        const remaining = Object.keys(myRooms);
+        focusedRoomId = remaining.length ? remaining[0] : null;
+    }
+    renderRoomsUI();
+}
+
+function focusRoom(roomId) {
+    focusedRoomId = roomId;
+    showCompeteState('compete-active');
+    renderRoomsUI();
+}
+
+// Central re-render, called whenever any tracked room's data changes.
+function renderRoomsUI() {
+    const ids = Object.keys(myRooms);
+    if (document.getElementById('compete-home').classList.contains('active')) renderMyRoomsBanner();
+    if (ids.length === 0) {
+        if (document.getElementById('compete-active').classList.contains('active')) showCompeteState('compete-home');
+        return;
+    }
+    if (!focusedRoomId || !myRooms[focusedRoomId]) focusedRoomId = ids[0];
+    renderMatchSwitcher(ids);
+    if (document.getElementById('compete-active').classList.contains('active')) renderFocusedRoom();
+}
+
+function renderMatchSwitcher(ids) {
+    const wrap = document.getElementById('match-switcher');
+    if (!wrap) return;
+    if (ids.length <= 1) { wrap.style.display = 'none'; wrap.innerHTML = ''; return; }
+    wrap.style.display = 'flex';
+    wrap.innerHTML = ids.map(id => {
+        const r = myRooms[id].data;
+        if (!r) return '';
+        const isHost = r.hostUid === myUid;
+        const rivalName = isHost ? r.guestName : r.hostName;
+        const rivalSeed = isHost ? r.guestAvatarSeed : r.hostAvatarSeed;
+        const label = r.status === 'waiting' ? 'در انتظار' : (rivalName || '...');
+        return `<div class="match-pill ${id===focusedRoomId?'active':''}" onclick="focusRoom('${id}')">
+            <img src="${avatarUrl(rivalSeed || 'default')}"><span>${label}</span>
+        </div>`;
+    }).join('');
+}
+
+function renderFocusedRoom() {
+    const room = myRooms[focusedRoomId] && myRooms[focusedRoomId].data;
+    const waitingView = document.getElementById('match-waiting-view');
+    const activeView = document.getElementById('match-active-view');
+    if (!room) { waitingView.style.display = 'none'; activeView.style.display = 'none'; return; }
+    waitingView.style.display = room.status === 'waiting' ? 'block' : 'none';
+    activeView.style.display = room.status === 'active' ? 'block' : 'none';
+    if (room.status === 'waiting') {
+        const url = `${location.origin}${location.pathname}?room=${focusedRoomId}`;
+        document.getElementById('match-invite-link-value').value = url;
+    } else if (room.status === 'active') {
+        renderActiveVsBar(room);
+    }
+}
 
 /* ---------------- Create / Join via link ---------------- */
 function createInviteLink() {
+    if (roomSlotsFull()) return appAlert(`شما در حال حاضر ${new Intl.NumberFormat('fa-IR').format(MAX_CONCURRENT_ROOMS)} چالش باز دارید. ابتدا یکی را به پایان برسانید یا لغو کنید.`);
     const btn = document.getElementById('create-link-btn');
     btn.disabled = true;
+    beginLoadingIndicator();
     ensureReady(() => {
         const roomId = generateRoomCode();
         const roomData = {
@@ -5417,54 +5649,31 @@ function createInviteLink() {
             guestUid: null, scores: {}
         };
         fbDb.collection('rooms').doc(roomId).set(roomData).then(() => {
-            return fbDb.collection('users').doc(myUid).update({ currentRoomId: roomId });
+            return fbDb.collection('users').doc(myUid).update({ activeRoomIds: firebase.firestore.FieldValue.arrayUnion(roomId) });
         }).then(() => {
-            myProfile.currentRoomId = roomId;
+            myProfile.activeRoomIds = myProfile.activeRoomIds || [];
+            if (!myProfile.activeRoomIds.includes(roomId)) myProfile.activeRoomIds.push(roomId);
             cacheProfileLocally();
-            showInviteLinkUI(roomId);
-            watchRoomForGuestJoin(roomId);
+            trackRoom(roomId);
+            focusedRoomId = roomId;
+            showCompeteState('compete-active');
+            renderRoomsUI();
         }).catch((err) => appAlert('خطا در ساخت چالش: ' + err.message))
-          .finally(() => { btn.disabled = false; });
-    }, () => { btn.disabled = false; appAlert('اتصال برقرار نشد، دوباره تلاش کنید.'); });
+          .finally(() => { btn.disabled = false; endLoadingIndicator(); });
+    }, () => { btn.disabled = false; endLoadingIndicator(); appAlert('اتصال برقرار نشد، دوباره تلاش کنید.'); });
 }
 
-function showInviteLinkUI(roomId) {
-    const url = `${location.origin}${location.pathname}?room=${roomId}`;
-    document.getElementById('invite-link-value').value = url;
-    document.getElementById('invite-link-result').style.display = 'block';
-}
 function copyInviteLink() {
-    const input = document.getElementById('invite-link-value');
+    const input = document.getElementById('match-invite-link-value');
     input.select();
     input.setSelectionRange(0, 99999);
     document.execCommand('copy');
     appAlert('لینک کپی شد.');
 }
 function shareInviteLink() {
-    const url = document.getElementById('invite-link-value').value;
+    const url = document.getElementById('match-invite-link-value').value;
     if (navigator.share) navigator.share({ title: 'دعوت به چالش رستا', text: 'به یک چالش پاکی دعوت شده‌اید:', url }).catch(() => {});
     else copyInviteLink();
-}
-
-function showCompeteTransition(callback) {
-    const overlay = document.getElementById('compete-transition-overlay');
-    if (overlay) overlay.classList.add('active');
-    setTimeout(() => {
-        callback();
-        if (overlay) overlay.classList.remove('active');
-    }, 700);
-}
-
-function watchRoomForGuestJoin(roomId) {
-    if (activeRoomUnsub) activeRoomUnsub();
-    activeRoomUnsub = fbDb.collection('rooms').doc(roomId).onSnapshot((doc) => {
-        const data = doc.data();
-        if (!data) { if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; } return; }
-        if (data.status === 'active') {
-            activeRoomUnsub(); activeRoomUnsub = null;
-            showCompeteTransition(() => activateRoom(roomId));
-        }
-    });
 }
 
 function checkUrlForRoomJoin() {
@@ -5477,28 +5686,34 @@ function tryJoinPendingRoom() {
     if (!pendingJoinRoomId || !myProfile) return;
     const roomId = pendingJoinRoomId;
     pendingJoinRoomId = null;
+    beginLoadingIndicator();
     fbDb.collection('rooms').doc(roomId).get().then((doc) => {
+        endLoadingIndicator();
         if (!doc.exists) return appAlert('این چالش پیدا نشد یا حذف شده است.');
         const data = doc.data();
         if (data.status === 'active' || data.status === 'finished') {
-            if (data.hostUid === myUid || data.guestUid === myUid) { activateRoom(roomId); return; }
+            if (data.hostUid === myUid || data.guestUid === myUid) {
+                trackRoom(roomId); focusedRoomId = roomId; showCompeteState('compete-active'); renderRoomsUI();
+                return;
+            }
             return appAlert('این لینک چالش دیگر معتبر نیست.');
         }
         if (data.status !== 'waiting') return appAlert('این لینک چالش دیگر معتبر نیست.');
         if (data.hostUid === myUid) {
-            showInviteLinkUI(roomId); watchRoomForGuestJoin(roomId);
-            showCompeteState('compete-home'); renderCompeteHome();
+            trackRoom(roomId); focusedRoomId = roomId; showCompeteState('compete-active'); renderRoomsUI();
             return;
         }
+        if (roomSlotsFull()) return appAlert(`شما در حال حاضر ${new Intl.NumberFormat('fa-IR').format(MAX_CONCURRENT_ROOMS)} چالش باز دارید. ابتدا یکی را به پایان برسانید یا لغو کنید.`);
         joinRoom(roomId, data);
-    }).catch((err) => { console.log('tryJoinPendingRoom error:', err); renderCompeteTab(); });
+    }).catch((err) => { endLoadingIndicator(); console.log('tryJoinPendingRoom error:', err); renderCompeteTab(); });
 }
 
 function joinRoom(roomId, data) {
-    // Blocked check: if the host has blocked us, quietly refuse.
+    beginLoadingIndicator();
     fbDb.collection('users').doc(data.hostUid).get().then((hostDoc) => {
         const hostProfile = hostDoc.data();
         if (hostProfile && hostProfile.blocked && hostProfile.blocked.includes(myUid)) {
+            endLoadingIndicator();
             appAlert('امکان پیوستن به این چالش وجود ندارد.');
             return;
         }
@@ -5506,10 +5721,26 @@ function joinRoom(roomId, data) {
         fbDb.collection('rooms').doc(roomId).update({
             guestUid: myUid, guestName: myProfile.name, guestAvatarSeed: profileAvatarSeed(myProfile), guestCustomId: myProfile.customId,
             status: 'active', startedAt: now, endsAt: now + data.duration * 86400000
-        }).then(() => fbDb.collection('users').doc(myUid).update({ currentRoomId: roomId }))
-          .then(() => { myProfile.currentRoomId = roomId; cacheProfileLocally(); showCompeteTransition(() => activateRoom(roomId)); })
-          .catch((err) => appAlert('خطا در پیوستن به چالش: ' + err.message));
-    }).catch((err) => appAlert('خطا: ' + err.message));
+        }).then(() => fbDb.collection('users').doc(myUid).update({ activeRoomIds: firebase.firestore.FieldValue.arrayUnion(roomId) }))
+          .then(() => {
+              myProfile.activeRoomIds = myProfile.activeRoomIds || [];
+              if (!myProfile.activeRoomIds.includes(roomId)) myProfile.activeRoomIds.push(roomId);
+              cacheProfileLocally();
+              trackRoom(roomId);
+              focusedRoomId = roomId;
+              showCompeteTransition(() => { showCompeteState('compete-active'); renderRoomsUI(); });
+          }).catch((err) => appAlert('خطا در پیوستن به چالش: ' + err.message))
+          .finally(endLoadingIndicator);
+    }).catch((err) => { endLoadingIndicator(); appAlert('خطا: ' + err.message); });
+}
+
+function showCompeteTransition(callback) {
+    const overlay = document.getElementById('compete-transition-overlay');
+    if (overlay) overlay.classList.add('active');
+    setTimeout(() => {
+        callback();
+        if (overlay) overlay.classList.remove('active');
+    }, 700);
 }
 
 /* ---------------- Direct challenge (by ID, by friend uid) ---------------- */
@@ -5517,9 +5748,11 @@ function sendChallengeToId() {
     const targetId = document.getElementById('challenge-id-input').value.trim().toLowerCase();
     const statusEl = document.getElementById('challenge-send-status');
     if (!targetId) return;
+    if (roomSlotsFull()) { statusEl.innerText = `شما در حال حاضر ${new Intl.NumberFormat('fa-IR').format(MAX_CONCURRENT_ROOMS)} چالش باز دارید.`; statusEl.style.color = 'var(--accent-red)'; return; }
     if (targetId === myProfile.customId) { statusEl.innerText = 'نمی‌توانید به خودتان چالش بدهید.'; statusEl.style.color = 'var(--accent-red)'; return; }
     const btn = document.getElementById('send-challenge-btn');
     btn.disabled = true;
+    beginLoadingIndicator();
     statusEl.innerText = 'در حال جستجو...';
     statusEl.style.color = 'var(--text-muted)';
     ensureReady(() => {
@@ -5527,12 +5760,14 @@ function sendChallengeToId() {
             if (!unameDoc.exists) { statusEl.innerText = 'کاربری با این آیدی پیدا نشد.'; statusEl.style.color = 'var(--accent-red)'; return; }
             sendChallengeToUid(unameDoc.data().uid, statusEl);
         }).catch((err) => { statusEl.innerText = 'خطا در جستجو.'; statusEl.style.color = 'var(--accent-red)'; console.log(err); })
-          .finally(() => { btn.disabled = false; });
-    }, () => { btn.disabled = false; statusEl.innerText = 'اتصال برقرار نشد.'; statusEl.style.color = 'var(--accent-red)'; });
+          .finally(() => { btn.disabled = false; endLoadingIndicator(); });
+    }, () => { btn.disabled = false; endLoadingIndicator(); statusEl.innerText = 'اتصال برقرار نشد.'; statusEl.style.color = 'var(--accent-red)'; });
 }
 
 function challengeFriendDirectly(uid) {
-    ensureReady(() => sendChallengeToUid(uid, null));
+    if (roomSlotsFull()) return appAlert(`شما در حال حاضر ${new Intl.NumberFormat('fa-IR').format(MAX_CONCURRENT_ROOMS)} چالش باز دارید.`);
+    beginLoadingIndicator();
+    ensureReady(() => { sendChallengeToUid(uid, null); endLoadingIndicator(); }, () => { endLoadingIndicator(); appAlert('اتصال برقرار نشد.'); });
 }
 
 function sendChallengeToUid(targetUid, statusEl) {
@@ -5540,8 +5775,8 @@ function sendChallengeToUid(targetUid, statusEl) {
         const targetProfile = targetDoc.data();
         if (!targetProfile) { if (statusEl) { statusEl.innerText = 'کاربر پیدا نشد.'; statusEl.style.color = 'var(--accent-red)'; } return; }
         if (targetProfile.blocked && targetProfile.blocked.includes(myUid)) {
-            if (statusEl) { statusEl.innerText = 'امکان ارسال درخواست به این کاربر وجود ندارد.'; statusEl.style.color = 'var(--accent-red)'; }
-            else appAlert('امکان ارسال درخواست به این کاربر وجود ندارد.');
+            const msg = 'امکان ارسال درخواست به این کاربر وجود ندارد.';
+            if (statusEl) { statusEl.innerText = msg; statusEl.style.color = 'var(--accent-red)'; } else appAlert(msg);
             return;
         }
         const roomId = generateRoomCode();
@@ -5551,22 +5786,25 @@ function sendChallengeToUid(targetUid, statusEl) {
             guestUid: null, scores: {}
         };
         fbDb.collection('rooms').doc(roomId).set(roomData).then(() => {
-            return fbDb.collection('users').doc(myUid).update({ currentRoomId: roomId });
+            return fbDb.collection('users').doc(myUid).update({ activeRoomIds: firebase.firestore.FieldValue.arrayUnion(roomId) });
         }).then(() => {
             return fbDb.collection('users').doc(targetUid).collection('invites').add({
                 fromUid: myUid, fromName: myProfile.name, fromAvatarSeed: profileAvatarSeed(myProfile),
                 duration: selectedDuration, roomId, status: 'pending', createdAt: Date.now()
             });
         }).then(() => {
-            myProfile.currentRoomId = roomId;
+            myProfile.activeRoomIds = myProfile.activeRoomIds || [];
+            if (!myProfile.activeRoomIds.includes(roomId)) myProfile.activeRoomIds.push(roomId);
             cacheProfileLocally();
+            trackRoom(roomId);
+            focusedRoomId = roomId;
             if (statusEl) { statusEl.innerText = 'درخواست ارسال شد.'; statusEl.style.color = 'var(--accent-green)'; document.getElementById('challenge-id-input').value = ''; }
             else appAlert('درخواست چالش ارسال شد.');
-            showInviteLinkUI(roomId);
-            watchRoomForGuestJoin(roomId);
+            showCompeteState('compete-active');
+            renderRoomsUI();
         }).catch((err) => {
-            if (statusEl) { statusEl.innerText = 'خطا در ارسال درخواست.'; statusEl.style.color = 'var(--accent-red)'; }
-            else appAlert('خطا در ارسال درخواست: ' + err.message);
+            const msg = 'خطا در ارسال درخواست.';
+            if (statusEl) { statusEl.innerText = msg; statusEl.style.color = 'var(--accent-red)'; } else appAlert(msg + ' ' + err.message);
         });
     }).catch((err) => console.log(err));
 }
@@ -5584,9 +5822,7 @@ function listenForMyInvites() {
             if (badge) badge.style.display = snap.empty ? 'none' : 'block';
             if (!firstSnapshot) {
                 snap.docChanges().forEach((change) => {
-                    if (change.type === 'added' && !knownInviteIds.has(change.doc.id)) {
-                        notifyNewChallengeInvite(change.doc.data());
-                    }
+                    if (change.type === 'added' && !knownInviteIds.has(change.doc.id)) notifyNewChallengeInvite(change.doc.data());
                 });
             }
             knownInviteIds = new Set(snap.docs.map(d => d.id));
@@ -5608,30 +5844,37 @@ function listenForMyInvites() {
         }, (err) => console.log('invites listener error:', err));
 }
 
-// Local (in-session) notification for a new challenge invite. Fires a real
-// OS notification if permission was granted; otherwise this is a no-op
-// beyond the nav badge dot, which always works with no setup at all.
 function notifyNewChallengeInvite(inv) {
     if (!('Notification' in window) || Notification.permission !== 'granted') return;
     try {
         const n = new Notification('درخواست رقابت جدید', {
             body: `${inv.fromName || 'یک دوست'} شما را به یک چالش دعوت کرده است.`,
             icon: './icon-192.png',
-            tag: 'rewire-challenge-invite'
+            tag: 'rewire-challenge-invite-' + Date.now()
         });
         n.onclick = () => { window.focus(); goToCompeteTab(); n.close(); };
     } catch (e) { console.log('notification error:', e); }
 }
 
 function acceptInvite(inviteId, roomId, duration) {
+    if (roomSlotsFull()) return appAlert(`شما در حال حاضر ${new Intl.NumberFormat('fa-IR').format(MAX_CONCURRENT_ROOMS)} چالش باز دارید. ابتدا یکی را به پایان برسانید یا لغو کنید.`);
+    beginLoadingIndicator();
     const now = Date.now();
     fbDb.collection('rooms').doc(roomId).update({
         guestUid: myUid, guestName: myProfile.name, guestAvatarSeed: profileAvatarSeed(myProfile), guestCustomId: myProfile.customId,
         status: 'active', startedAt: now, endsAt: now + parseInt(duration) * 86400000
-    }).then(() => fbDb.collection('users').doc(myUid).update({ currentRoomId: roomId }))
+    }).then(() => fbDb.collection('users').doc(myUid).update({ activeRoomIds: firebase.firestore.FieldValue.arrayUnion(roomId) }))
       .then(() => fbDb.collection('users').doc(myUid).collection('invites').doc(inviteId).update({ status: 'accepted' }))
-      .then(() => { myProfile.currentRoomId = roomId; cacheProfileLocally(); activateRoom(roomId); })
-      .catch((err) => appAlert('خطا: ' + err.message));
+      .then(() => {
+          myProfile.activeRoomIds = myProfile.activeRoomIds || [];
+          if (!myProfile.activeRoomIds.includes(roomId)) myProfile.activeRoomIds.push(roomId);
+          cacheProfileLocally();
+          trackRoom(roomId);
+          focusedRoomId = roomId;
+          showCompeteState('compete-active');
+          renderRoomsUI();
+      }).catch((err) => appAlert('خطا: ' + err.message))
+      .finally(endLoadingIndicator);
 }
 function declineInvite(inviteId) {
     fbDb.collection('users').doc(myUid).collection('invites').doc(inviteId).update({ status: 'declined' }).catch(() => {});
@@ -5672,15 +5915,11 @@ function blockUser(uid) {
 
 /* ---------------- Rival / friend profile popup ---------------- */
 function openRivalProfile() {
-    const roomId = activeRoomId;
-    if (!roomId) return;
-    fbDb.collection('rooms').doc(roomId).get().then((doc) => {
-        const d = doc.data();
-        if (!d) return;
-        const rivalUid = d.hostUid === myUid ? d.guestUid : d.hostUid;
-        if (!rivalUid) return;
-        openProfileModalForUid(rivalUid);
-    });
+    const room = myRooms[focusedRoomId] && myRooms[focusedRoomId].data;
+    if (!room) return;
+    const rivalUid = room.hostUid === myUid ? room.guestUid : room.hostUid;
+    if (!rivalUid) return;
+    openProfileModalForUid(rivalUid);
 }
 
 function openProfileModalForUid(uid) {
@@ -5698,9 +5937,8 @@ function openProfileModalForUid(uid) {
         const medalsList = document.getElementById('rival-profile-medals-list');
         const medalsEmpty = document.getElementById('rival-profile-medals-empty');
         const personalMedals = isMe ? computePersonalMedalsList() : (p.personalMedals || []);
-        if (personalMedals.length === 0) {
-            medalsList.innerHTML = ''; medalsEmpty.style.display = 'block';
-        } else {
+        if (personalMedals.length === 0) { medalsList.innerHTML = ''; medalsEmpty.style.display = 'block'; }
+        else {
             medalsEmpty.style.display = 'none';
             medalsList.innerHTML = personalMedals.map(m => {
                 const dayLabel = new Intl.NumberFormat('fa-IR').format(m.days);
@@ -5721,7 +5959,8 @@ function openProfileModalForUid(uid) {
         document.getElementById('rival-profile-modal').classList.add('active');
     };
     if (isMe) { render(myProfile); return; }
-    fbDb.collection('users').doc(uid).get().then((doc) => render(doc.data())).catch((err) => console.log(err));
+    beginLoadingIndicator();
+    fbDb.collection('users').doc(uid).get().then((doc) => render(doc.data())).catch((err) => console.log(err)).finally(endLoadingIndicator);
 }
 function toggleFriendFromProfile() {
     if (!currentViewedProfileUid || currentViewedProfileUid === myUid) return;
@@ -5738,39 +5977,49 @@ function blockFromProfile() {
 }
 
 /* ---------------- Resume / cancel ---------------- */
-function resumeMyRoomIfAny() {
-    const roomId = myProfile && myProfile.currentRoomId;
-    if (!roomId) { renderCompeteTab(); return; }
-    fbDb.collection('rooms').doc(roomId).get().then((doc) => {
-        if (!doc.exists) { clearMyCurrentRoom(); renderCompeteTab(); return; }
-        const data = doc.data();
-        if (data.status === 'active') { activateRoom(roomId); return; }
-        if (data.status === 'waiting') { showInviteLinkUI(roomId); watchRoomForGuestJoin(roomId); renderCompeteTab(); return; }
-        if (data.status === 'finished') { clearMyCurrentRoom(); renderCompeteTab(); return; }
-        renderCompeteTab();
-    }).catch((err) => { console.log('resumeMyRoomIfAny error:', err); renderCompeteTab(); });
-}
-function clearMyCurrentRoom() {
-    if (myProfile) myProfile.currentRoomId = null;
-    cacheProfileLocally();
-    if (myUid && fbDb) fbDb.collection('users').doc(myUid).update({ currentRoomId: null }).catch(() => {});
-}
-function cancelWaitingChallenge() {
-    const roomId = myProfile && myProfile.currentRoomId;
-    if (!roomId) return;
-    appConfirm('این چالش لغو شود؟ لینک دعوتی که فرستاده‌اید دیگر کار نخواهد کرد.', () => {
-        if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; }
-        fbDb.collection('rooms').doc(roomId).delete().finally(() => {
-            clearMyCurrentRoom();
-            document.getElementById('invite-link-result').style.display = 'none';
-            renderCompeteTab();
+function resumeMyActiveRooms() {
+    const ids = (myProfile && myProfile.activeRoomIds) || [];
+    if (ids.length === 0) { renderCompeteTab(); return; }
+    let remaining = ids.length;
+    const validIds = [];
+    beginLoadingIndicator();
+    ids.forEach((id) => {
+        fbDb.collection('rooms').doc(id).get().then((doc) => {
+            if (doc.exists && doc.data().status !== 'finished') { validIds.push(id); trackRoom(id); }
+            else fbDb.collection('users').doc(myUid).update({ activeRoomIds: firebase.firestore.FieldValue.arrayRemove(id) }).catch(() => {});
+        }).catch(() => {}).finally(() => {
+            remaining--;
+            if (remaining === 0) {
+                if (myProfile) myProfile.activeRoomIds = validIds;
+                cacheProfileLocally();
+                endLoadingIndicator();
+                renderCompeteTab();
+            }
         });
     });
 }
+
+function cancelWaitingChallenge() {
+    const roomId = focusedRoomId;
+    if (!roomId) return;
+    appConfirm('این چالش لغو شود؟ لینک دعوتی که فرستاده‌اید دیگر کار نخواهد کرد.', () => {
+        beginLoadingIndicator();
+        fbDb.collection('rooms').doc(roomId).delete().finally(() => {
+            fbDb.collection('users').doc(myUid).update({ activeRoomIds: firebase.firestore.FieldValue.arrayRemove(roomId) }).catch(() => {});
+            if (myProfile && myProfile.activeRoomIds) myProfile.activeRoomIds = myProfile.activeRoomIds.filter(i => i !== roomId);
+            cacheProfileLocally();
+            untrackRoom(roomId);
+            renderCompeteTab();
+            endLoadingIndicator();
+        });
+    });
+}
+
 function cancelActiveChallenge() {
-    if (!activeRoomId) return;
+    const roomId = focusedRoomId;
+    if (!roomId) return;
     appConfirm('از ترک این چالش مطمئن هستید؟ این رقابت برای هر دو نفر پایان می‌یابد و بدون برنده بسته می‌شود.', () => {
-        const roomId = activeRoomId;
+        beginLoadingIndicator();
         fbDb.collection('rooms').doc(roomId).get().then((doc) => {
             const d = doc.data();
             const updates = { status: 'finished', finishedAt: Date.now(), winnerUid: null, cancelled: true };
@@ -5779,13 +6028,7 @@ function cancelActiveChallenge() {
                 updates.finalGuestScore = (d.scores && d.scores[d.guestUid] && d.scores[d.guestUid].score) || 0;
             }
             return fbDb.collection('rooms').doc(roomId).update(updates);
-        }).finally(() => {
-            if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; }
-            if (compScoreSyncInterval) { clearInterval(compScoreSyncInterval); compScoreSyncInterval = null; }
-            activeRoomId = null;
-            clearMyCurrentRoom();
-            renderCompeteTab();
-        });
+        }).catch((err) => console.log(err)).finally(endLoadingIndicator);
     });
 }
 
@@ -5807,9 +6050,9 @@ function computePreCompStreakDays(compStartMs) {
 }
 
 // Fair, continuous (fractional-day) scoring based on each player's OWN
-// progress relative to their own historical baseline. Updates immediately
-// (not once per full day). The streak carried in when the competition
-// starts counts too, but the bonus is capped relative to YOUR OWN baseline.
+// progress relative to their own historical baseline. The streak carried
+// in when the competition starts counts too, but the bonus is capped
+// relative to YOUR OWN baseline, not your opponent's.
 function computeCompetitionScore(compStartMs, nowMs, baseline, preCompStreakDays) {
     const dayMs = 86400000;
     const slipsInWindow = appData.slips.filter(s => s.date >= compStartMs && s.date <= nowMs).sort((a,b) => a.date - b.date);
@@ -5838,34 +6081,43 @@ function computeCompetitionScore(compStartMs, nowMs, baseline, preCompStreakDays
     return { score: Math.max(0, Math.round(score)), currentStreakDays, totalDays: Math.floor((nowMs - compStartMs) / dayMs) };
 }
 
-function activateRoom(roomId) {
-    activeRoomId = roomId;
-    if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; }
-    activeRoomUnsub = fbDb.collection('rooms').doc(roomId).onSnapshot((doc) => {
-        const data = doc.data();
-        if (!data) return;
-        if (data.status === 'finished') { renderFinishedScreen(data); return; }
-        renderActiveVsBar(data);
-        checkIfCompetitionEnded(data);
-    }, (err) => console.log('room listener error:', err));
-    syncMyCompetitionScore();
+function startScoreSyncLoop() {
     if (compScoreSyncInterval) clearInterval(compScoreSyncInterval);
-    compScoreSyncInterval = setInterval(syncMyCompetitionScore, 8000);
-    showCompeteState('compete-active');
+    compScoreSyncInterval = setInterval(syncAllActiveScores, 8000);
+}
+function syncAllActiveScores() {
+    if (!fbDb) return;
+    Object.keys(myRooms).forEach((roomId) => {
+        const r = myRooms[roomId].data;
+        if (r && r.status === 'active') syncScoreForRoom(roomId, r);
+    });
+}
+function syncScoreForRoom(roomId, data) {
+    const baseline = computeBaselineDays();
+    const preStreak = computePreCompStreakDays(data.startedAt);
+    const result = computeCompetitionScore(data.startedAt, Math.min(Date.now(), data.endsAt), baseline, preStreak);
+    fbDb.collection('rooms').doc(roomId).update({
+        [`scores.${myUid}`]: { score: result.score, streak: result.currentStreakDays, baseline, updatedAt: Date.now() }
+    }).catch((err) => console.log('score sync error:', err));
+    if (Date.now() >= data.endsAt && data.hostUid === myUid) checkIfCompetitionEndedForRoom(roomId, data);
 }
 
-function syncMyCompetitionScore() {
-    if (!activeRoomId || !fbDb) return;
-    fbDb.collection('rooms').doc(activeRoomId).get().then((doc) => {
-        const data = doc.data();
-        if (!data || data.status !== 'active') return;
-        const baseline = computeBaselineDays();
-        const preStreak = computePreCompStreakDays(data.startedAt);
-        const result = computeCompetitionScore(data.startedAt, Math.min(Date.now(), data.endsAt), baseline, preStreak);
-        fbDb.collection('rooms').doc(activeRoomId).update({
-            [`scores.${myUid}`]: { score: result.score, streak: result.currentStreakDays, baseline, updatedAt: Date.now() }
-        }).catch((err) => console.log('score sync error:', err));
-    }).catch((err) => console.log('score sync read error:', err));
+function checkIfCompetitionEndedForRoom(roomId, data) {
+    if (data.status !== 'active') return;
+    if (Date.now() < data.endsAt) return;
+    fbDb.runTransaction((tx) => {
+        const ref = fbDb.collection('rooms').doc(roomId);
+        return tx.get(ref).then((doc) => {
+            const d = doc.data();
+            if (d.status !== 'active') return;
+            const hostScore = (d.scores && d.scores[d.hostUid] && d.scores[d.hostUid].score) || 0;
+            const guestScore = (d.scores && d.scores[d.guestUid] && d.scores[d.guestUid].score) || 0;
+            let winnerUid = null;
+            if (hostScore > guestScore) winnerUid = d.hostUid;
+            else if (guestScore > hostScore) winnerUid = d.guestUid;
+            tx.update(ref, { status: 'finished', finishedAt: Date.now(), winnerUid, finalHostScore: hostScore, finalGuestScore: guestScore });
+        });
+    }).catch((err) => console.log('finish transaction error:', err));
 }
 
 function renderActiveVsBar(data) {
@@ -5898,31 +6150,11 @@ function renderActiveVsBar(data) {
     document.getElementById('compete-duration-label').innerText = `(${durLabel})`;
 }
 
-function checkIfCompetitionEnded(data) {
-    if (data.status !== 'active') return;
-    if (Date.now() < data.endsAt) return;
-    if (data.hostUid !== myUid) return;
-    fbDb.runTransaction((tx) => {
-        const ref = fbDb.collection('rooms').doc(activeRoomId);
-        return tx.get(ref).then((doc) => {
-            const d = doc.data();
-            if (d.status !== 'active') return;
-            const hostScore = (d.scores && d.scores[d.hostUid] && d.scores[d.hostUid].score) || 0;
-            const guestScore = (d.scores && d.scores[d.guestUid] && d.scores[d.guestUid].score) || 0;
-            let winnerUid = null;
-            if (hostScore > guestScore) winnerUid = d.hostUid;
-            else if (guestScore > hostScore) winnerUid = d.guestUid;
-            tx.update(ref, { status: 'finished', finishedAt: Date.now(), winnerUid, finalHostScore: hostScore, finalGuestScore: guestScore });
-        });
-    }).then(() => finalizeMyResult(activeRoomId)).catch((err) => console.log('finish transaction error:', err));
-}
-
-let finalizedRoomIds = new Set();
-function finalizeMyResult(roomId) {
+/* ---------------- Finish / history ---------------- */
+function finalizeMyResult(roomId, preloadedData) {
     if (!roomId || finalizedRoomIds.has(roomId)) return;
     finalizedRoomIds.add(roomId);
-    fbDb.collection('rooms').doc(roomId).get().then((doc) => {
-        const d = doc.data();
+    const proceed = (d) => {
         if (!d) return;
         const isHost = d.hostUid === myUid;
         const iWon = d.winnerUid === myUid;
@@ -5950,16 +6182,67 @@ function finalizeMyResult(roomId) {
             date: d.finishedAt || Date.now()
         };
         updates.history = firebase.firestore.FieldValue.arrayUnion(historyEntry);
-        updates.currentRoomId = null;
+        updates.activeRoomIds = firebase.firestore.FieldValue.arrayRemove(roomId);
         fbDb.collection('users').doc(myUid).update(updates).then(() => {
             if (!myProfile) return;
             if (!isDraw && !d.cancelled) myProfile[iWon ? 'wins' : 'losses'] = (myProfile[iWon ? 'wins' : 'losses'] || 0) + 1;
-            myProfile.currentRoomId = null;
+            if (myProfile.activeRoomIds) myProfile.activeRoomIds = myProfile.activeRoomIds.filter(i => i !== roomId);
             myProfile.history = myProfile.history || [];
             myProfile.history.push(historyEntry);
             cacheProfileLocally();
         }).catch((err) => console.log('finalizeMyResult update error:', err));
-    }).catch((err) => console.log('finalizeMyResult read error:', err));
+    };
+    if (preloadedData) { proceed(preloadedData); return; }
+    fbDb.collection('rooms').doc(roomId).get().then((doc) => proceed(doc.data())).catch((err) => console.log('finalizeMyResult read error:', err));
+}
+
+function showMatchFinished(roomId, data) {
+    finalizeMyResult(roomId, data);
+    const isHost = data.hostUid === myUid;
+    const myName = isHost ? data.hostName : data.guestName;
+    const myAvatarSeed = isHost ? data.hostAvatarSeed : data.guestAvatarSeed;
+    const rivalName = isHost ? data.guestName : data.hostName;
+    const rivalAvatarSeed = isHost ? data.guestAvatarSeed : data.hostAvatarSeed;
+    const myScore = isHost ? data.finalHostScore : data.finalGuestScore;
+    const rivalScore = isHost ? data.finalGuestScore : data.finalHostScore;
+    const iWon = data.winnerUid === myUid;
+    const isDraw = !data.winnerUid;
+
+    document.getElementById('finish-my-avatar').src = avatarUrl(myAvatarSeed);
+    document.getElementById('finish-my-name').innerText = myName || 'شما';
+    document.getElementById('finish-my-score').innerText = myScore || 0;
+    document.getElementById('finish-rival-avatar').src = avatarUrl(rivalAvatarSeed || 'default');
+    document.getElementById('finish-rival-name').innerText = rivalName || '-';
+    document.getElementById('finish-rival-score').innerText = rivalScore || 0;
+
+    if (data.cancelled) {
+        document.getElementById('finish-result-icon').innerText = '🚩';
+        document.getElementById('finish-result-title').innerText = 'این چالش لغو شد';
+        document.getElementById('finish-result-sub').innerText = 'رقابت پیش از پایان توسط یکی از طرفین متوقف شد.';
+    } else if (isDraw) {
+        document.getElementById('finish-result-icon').innerText = '🤝';
+        document.getElementById('finish-result-title').innerText = 'رقابت مساوی شد';
+        document.getElementById('finish-result-sub').innerText = 'هر دو نفر امتیاز برابر کسب کردید.';
+    } else if (iWon) {
+        document.getElementById('finish-result-icon').innerText = '🏆';
+        document.getElementById('finish-result-title').innerText = 'تبریک، شما برنده شدید';
+        document.getElementById('finish-result-sub').innerText = 'یک مدال جدید به ویترین شما اضافه شد.';
+        fireConfetti();
+    } else {
+        document.getElementById('finish-result-icon').innerText = '💪';
+        document.getElementById('finish-result-title').innerText = 'این بار دوستتان برنده شد';
+        document.getElementById('finish-result-sub').innerText = 'چالش بعدی می‌تواند مال شما باشد. ادامه دهید.';
+    }
+    currentFinishedRoomId = roomId;
+    document.getElementById('match-finished-modal').classList.add('active');
+}
+
+function closeFinishedMatch() {
+    closeModal('match-finished-modal');
+    const roomId = currentFinishedRoomId;
+    currentFinishedRoomId = null;
+    if (roomId) untrackRoom(roomId);
+    renderCompeteTab();
 }
 
 function openChallengeHistory() {
@@ -5993,61 +6276,6 @@ function openChallengeHistory() {
         }).join('');
     }
     document.getElementById('challenge-history-modal').classList.add('active');
-}
-
-function renderFinishedScreen(data) {
-    if (activeRoomUnsub) { activeRoomUnsub(); activeRoomUnsub = null; }
-    if (compScoreSyncInterval) { clearInterval(compScoreSyncInterval); compScoreSyncInterval = null; }
-    finalizeMyResult(activeRoomId || data.roomId);
-    const isHost = data.hostUid === myUid;
-    const myName = isHost ? data.hostName : data.guestName;
-    const myAvatarSeed = isHost ? data.hostAvatarSeed : data.guestAvatarSeed;
-    const rivalUidForFinish = isHost ? data.guestUid : data.hostUid;
-    const rivalName = isHost ? data.guestName : data.hostName;
-    const rivalAvatarSeed = isHost ? data.guestAvatarSeed : data.hostAvatarSeed;
-    const myScore = isHost ? data.finalHostScore : data.finalGuestScore;
-    const rivalScore = isHost ? data.finalGuestScore : data.finalHostScore;
-    const iWon = data.winnerUid === myUid;
-    const isDraw = !data.winnerUid;
-
-    const finishMyAvatarEl = document.getElementById('finish-my-avatar');
-    const finishRivalAvatarEl = document.getElementById('finish-rival-avatar');
-    finishMyAvatarEl.src = avatarUrl(myAvatarSeed);
-    finishMyAvatarEl.style.cursor = 'pointer';
-    finishMyAvatarEl.onclick = () => openProfileModalForUid(myUid);
-    document.getElementById('finish-my-name').innerText = myName || 'شما';
-    document.getElementById('finish-my-score').innerText = myScore || 0;
-    finishRivalAvatarEl.src = avatarUrl(rivalAvatarSeed || 'default');
-    if (rivalUidForFinish) { finishRivalAvatarEl.style.cursor = 'pointer'; finishRivalAvatarEl.onclick = () => openProfileModalForUid(rivalUidForFinish); }
-    document.getElementById('finish-rival-name').innerText = rivalName || '-';
-    document.getElementById('finish-rival-score').innerText = rivalScore || 0;
-
-    if (data.cancelled) {
-        document.getElementById('finish-result-icon').innerText = '🚩';
-        document.getElementById('finish-result-title').innerText = 'این چالش لغو شد';
-        document.getElementById('finish-result-sub').innerText = 'رقابت پیش از پایان توسط یکی از طرفین متوقف شد.';
-    } else if (isDraw) {
-        document.getElementById('finish-result-icon').innerText = '🤝';
-        document.getElementById('finish-result-title').innerText = 'رقابت مساوی شد';
-        document.getElementById('finish-result-sub').innerText = 'هر دو نفر امتیاز برابر کسب کردید.';
-    } else if (iWon) {
-        document.getElementById('finish-result-icon').innerText = '🏆';
-        document.getElementById('finish-result-title').innerText = 'تبریک، شما برنده شدید';
-        document.getElementById('finish-result-sub').innerText = 'یک مدال جدید به ویترین شما اضافه شد.';
-        fireConfetti();
-    } else {
-        document.getElementById('finish-result-icon').innerText = '💪';
-        document.getElementById('finish-result-title').innerText = 'این بار دوستتان برنده شد';
-        document.getElementById('finish-result-sub').innerText = 'چالش بعدی می‌تواند مال شما باشد. ادامه دهید.';
-    }
-    activeRoomId = null;
-    showCompeteState('compete-finished');
-}
-
-function leaveFinishedCompetition() {
-    loadMyProfile();
-    showCompeteState('compete-home');
-    renderCompeteTab();
 }
 
 function fireConfetti() {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rewire-cache-v17';
+const CACHE_NAME = 'rewire-cache-v18';
 const STATIC_ASSETS = [
   './icon-192.png',
   './icon-512.png'
