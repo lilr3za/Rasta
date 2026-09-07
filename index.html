@@ -5272,6 +5272,17 @@ function loadMyProfile() {
             if (!myProfile.activeRoomIds) myProfile.activeRoomIds = [];
             if (typeof myProfile.wins !== 'number') myProfile.wins = 0;
             if (typeof myProfile.losses !== 'number') myProfile.losses = 0;
+            // One-time migration: older versions stored a single
+            // currentRoomId field instead of the activeRoomIds array.
+            // Fold any leftover reference in so in-progress matches from
+            // before this update aren't orphaned.
+            if (myProfile.currentRoomId && !myProfile.activeRoomIds.includes(myProfile.currentRoomId)) {
+                myProfile.activeRoomIds.push(myProfile.currentRoomId);
+                fbDb.collection('users').doc(myUid).update({
+                    activeRoomIds: myProfile.activeRoomIds,
+                    currentRoomId: firebase.firestore.FieldValue.delete()
+                }).catch(() => {});
+            }
             competeStatus = 'ready';
             cacheProfileLocally();
             updateCompeteIdSettingLabel();
