@@ -2412,7 +2412,7 @@ margin-bottom: 20px;
 <div id="compete-offline" class="compete-state">
 <div class="card" style="text-align:center; padding: 30px 20px;">
 <i class="fa-solid fa-wifi" style="font-size: 30px; color: var(--accent-red); margin-bottom: 14px;"></i>
-<p style="color: var(--text-muted); font-size: 13px; line-height: 1.8;">ارتباط با سرور رقابت برقرار نشد. این بخش نیاز به اینترنت دارد؛ اتصال خود را بررسی کنید و دوباره تلاش کنید.</p>
+<p style="color: var(--text-muted); font-size: 13px; line-height: 1.8;">این بخش نیاز به اینترنت دارد. اتصال اینترنت خود را بررسی کنید و دوباره تلاش کنید.</p>
 <button class="btn btn-secondary" style="margin-top:14px; width:100%;" onclick="location.reload()">تلاش دوباره</button>
 </div>
 </div>
@@ -3944,7 +3944,6 @@ dots.forEach((d, i) => { d.classList.toggle('active', i === index); });
 // --- Advanced Stats, Insights & Charts ---
 let slipStreakData = [];
 let slipStreakLabels = [];
-let slipMinCompletedStreak = null; // shortest PAST streak (excludes the current ongoing one)
 let triggerStreakData = [];
 let triggerStreakLabels = [];
 
@@ -4021,7 +4020,7 @@ document.getElementById('stat-total-wd').innerText = windowWds.length;
 // Trend-based progress percentage (linear regression across all clean periods, not just vs previous period)
 const trendStatEl = document.getElementById('stat-trend-progress');
 if (trendStatEl) {
-const trendResult = calculateTrendProgress(slipIntervals);
+const trendResult = calculateTrendProgress();
 if (trendResult === null) {
 trendStatEl.innerText = '-';
 trendStatEl.style.color = '';
@@ -4033,7 +4032,6 @@ trendStatEl.style.color = trendResult.percent < 0 ? 'var(--accent-red)' : 'var(-
 
 slipStreakData = slipIntervals;
 slipStreakLabels = slipIntervals.map((_, i) => i === slipIntervals.length - 1 ? 'فعلی' : `دوره ${i + 1}`);
-slipMinCompletedStreak = completedIntervals.length > 0 ? minInterval : null;
 triggerStreakData = triggerIntervals;
 triggerStreakLabels = triggerIntervals.map((_, i) => i === triggerIntervals.length - 1 ? 'فعلی' : `دوره ${i + 1}`);
 
@@ -4156,14 +4154,6 @@ if (warning) warning.style.display = 'none';
 const isLight = appData.theme === 'light';
 const gridColor = isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)';
 const tickColor = isLight ? '#666' : '#8a8d91';
-const lastIdx = slipStreakData.length - 1;
-// The current (still-ongoing) streak is shown dashed as long as it hasn't
-// yet caught up to the shortest streak you've had before - a visual cue
-// that you're currently in "worse than your worst past record" territory.
-// The moment a new slip logs, this streak stops being "current" (it's no
-// longer the last item), so it automatically renders as a normal bar/line
-// from then on regardless of whether it ever crossed the threshold.
-const currentBelowMinRecord = lastIdx > 0 && slipMinCompletedStreak !== null && slipStreakData[lastIdx] < slipMinCompletedStreak;
 const bgColors = slipStreakData.map((_, i) => i === slipStreakData.length - 1 ? 'rgba(42, 101, 240, 0.8)' :
 'rgba(52, 199, 89, 0.8)');
 const borderColors = slipStreakData.map((_, i) => i === slipStreakData.length - 1 ? '#2a65f0' : '#34c759');
@@ -4177,7 +4167,6 @@ data: {
 labels: slipStreakLabels,
 datasets: [{ label: 'طول دوره (روز)', data: slipStreakData.map(d => d.toFixed(1)),
 backgroundColor: bgColors, borderColor: borderColors, borderWidth: 1,
-borderDash: (ctx) => (ctx.dataIndex === lastIdx && currentBelowMinRecord) ? [6, 4] : [],
 borderRadius: 6 }]
 },
 options: {
@@ -4201,7 +4190,6 @@ data: {
 labels: slipStreakLabels,
 datasets: [{ label: 'طول دوره (روز)', data: slipStreakData.map(d => d.toFixed(1)),
 borderColor: lineColor, backgroundColor: 'transparent',
-segment: { borderDash: (ctx) => (ctx.p1DataIndex === lastIdx && currentBelowMinRecord) ? [6, 6] : undefined },
 pointBackgroundColor: dotColor, pointBorderColor: dotColor, pointRadius: 6,
 pointHoverRadius: 9, borderWidth: 2.5, tension: 0.3, fill: false }]
 },
@@ -4511,9 +4499,15 @@ window.URL.revokeObjectURL(url); }, 0);
 // Instead of comparing only the latest period to the previous one, this fits a regression line
 // through the full history of completed clean periods so short-term fluctuations don't cause
 // drastic swings in the reported percentage.
-function calculateTrendProgress(periods) {
-if (!periods || periods.length < 2) return null;
-const completed = periods;
+function calculateTrendProgress() {
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
+if (!appData.slips || appData.slips.length < 2) return null;
+const sorted = [...appData.slips].sort((a, b) => a.date - b.date);
+let completed = [];
+for (let i = 1; i < sorted.length; i++) {
+completed.push((sorted[i].date - sorted[i - 1].date) / MS_PER_DAY);
+}
+if (completed.length < 2) return null;
 const n = completed.length;
 const xs = completed.map((_, i) => i + 1);
 const sumX = xs.reduce((a, b) => a + b, 0);
@@ -4562,7 +4556,7 @@ allIntervals.push((now - lastDate) / MS_PER_DAY);
 }
 const bestRecord = Math.floor(Math.max(...allIntervals, 0));
 const totalDays = Math.floor((now - appData.installDate) / MS_PER_DAY);
-const trend = calculateTrendProgress(allIntervals);
+const trend = calculateTrendProgress();
 const trendPercentText = trend === null ? '-' : `${trend.percent > 0 ? '+' : ''}${trend.percent}%`;
 
 function daysToLabel(days) {
@@ -5059,18 +5053,6 @@ return this;
 
 // Init App
 initApp();
-
-// Recompute progress stats (trend %, streaks, etc.) whenever the app
-// regains focus or becomes visible again - not just when a new slip is
-// logged. calculateStatsAndChart() always reads whichever timeframe is
-// currently selected (7 days, 1 month, ...) and includes the current
-// ongoing streak, so this stays correct and continuous for any period.
-document.addEventListener('visibilitychange', () => {
-if (document.visibilityState === 'visible' && appData.isStarted) updateAllSections();
-});
-window.addEventListener('focus', () => {
-if (appData.isStarted) updateAllSections();
-});
 </script>
 <script>
 /* =========================================================================
@@ -5158,31 +5140,14 @@ function readCachedProfile() {
     if (cached && cached.profile) {
         myProfile = cached.profile;
         myUid = cached.uid;
-        markCompeteReady();
+        competeStatus = 'ready';
     }
 })();
 
 /* ---------------- Init / connectivity ---------------- */
-let competeConnectTimeout = null;
-function markCompeteReady() {
-    competeStatus = 'ready';
-    if (competeConnectTimeout) { clearTimeout(competeConnectTimeout); competeConnectTimeout = null; }
-}
 function initCompeteFeature() {
     if (!navigator.onLine) { showCompeteState('compete-offline'); return; }
     if (competeStatus !== 'ready') showCompeteState('compete-loading');
-    if (competeConnectTimeout) clearTimeout(competeConnectTimeout);
-    // Belt-and-braces: navigator.onLine can report true while the device
-    // still can't actually reach the server (firewall, DNS, server-side
-    // issue, etc.). If we haven't heard back within a reasonable time,
-    // stop spinning and tell the person plainly that the connection
-    // failed, instead of leaving them on a loading screen forever.
-    competeConnectTimeout = setTimeout(() => {
-        if (competeStatus !== 'ready') {
-            console.log('Compete: server connection timed out');
-            showCompeteState('compete-offline');
-        }
-    }, 5000);
     try {
         if (!fbApp) {
             fbApp = firebase.initializeApp(firebaseConfig);
@@ -5257,7 +5222,7 @@ function showCompeteState(stateId) {
         if (textEl) textEl.innerText = 'در حال اتصال به سرور رقابت...';
         competeLoadingTimeout = setTimeout(() => {
             if (textEl) textEl.innerText = 'اتصال شما کند است، کمی صبر کنید...';
-        }, 2500);
+        }, 4000);
     }
 }
 
@@ -5318,7 +5283,7 @@ function loadMyProfile() {
                     currentRoomId: firebase.firestore.FieldValue.delete()
                 }).catch(() => {});
             }
-            markCompeteReady();
+            competeStatus = 'ready';
             cacheProfileLocally();
             updateCompeteIdSettingLabel();
             listenForMyInvites();
@@ -5327,7 +5292,7 @@ function loadMyProfile() {
             else resumeMyActiveRooms();
         } else {
             myProfile = null;
-            markCompeteReady();
+            competeStatus = 'ready';
             if (document.getElementById('compete').classList.contains('active')) showCompeteState('compete-needs-profile');
         }
     }).catch((err) => {
@@ -5439,7 +5404,7 @@ function saveCompeteProfile() {
             };
             fbDb.collection('users').doc(myUid).set(profileData, { merge: true }).then(() => {
                 myProfile = profileData;
-                markCompeteReady();
+                competeStatus = 'ready';
                 cacheProfileLocally();
                 updateCompeteIdSettingLabel();
                 syncNameAvatarToAllRooms(profileData);
